@@ -1,0 +1,3 @@
+dist
+.pytest_cache
+.venv

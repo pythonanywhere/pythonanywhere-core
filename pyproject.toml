@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "pythonanywhere-core"
+version = "0.1.0"
+description = "API wrapper for programmatic management of PythonAnywhere services."
+authors = ["PythonAnywhere <developers@pythonanywhere.com>"]
+license = "MIT"
+readme = "README.rst"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.6",
+]
+keywords = ["pythonanywhere", "api", "cloud", "web hosting"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pytest = "^6.2.4"
+requests = "^2.25.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+pytest-mock = "^3.6.1"
+responses = "^0.13.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
