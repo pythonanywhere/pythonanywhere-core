@@ -3,17 +3,11 @@ from typing import Dict
 
 import requests
 
+from pythonanywhere_core.exceptions import AuthenticationError, NoTokenError
+
 PYTHON_VERSIONS: Dict[str, str] = {
-    "3.6": "python36", "3.7": "python37", "3.8": "python38",
+    "3.6": "python36", "3.7": "python37", "3.8": "python38", "3.9": "python39"
 }
-
-
-class AuthenticationError(Exception):
-    pass
-
-
-class NoTokenError(Exception):
-    pass
 
 
 def get_api_endpoint() -> str:

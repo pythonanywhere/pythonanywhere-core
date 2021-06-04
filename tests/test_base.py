@@ -1,8 +1,8 @@
 import pytest
 import responses
 
-from pythonanywhere_core.base import AuthenticationError, call_api, get_api_endpoint
-
+from pythonanywhere_core.base import call_api, get_api_endpoint
+from pythonanywhere_core.exceptions import AuthenticationError
 
 @pytest.fixture
 def mock_requests(mocker):
