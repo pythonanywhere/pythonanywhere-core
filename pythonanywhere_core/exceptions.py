@@ -6,5 +6,9 @@ class SanityException(Exception):
     pass
 
 
-class NoTokenError(Exception):
+class PythonAnywhereApiException(Exception):
+    pass
+
+
+class NoTokenError(PythonAnywhereApiException):
     pass
