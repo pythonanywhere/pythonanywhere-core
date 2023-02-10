@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pythonanywhere-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "API wrapper for programmatic management of PythonAnywhere services."
 authors = ["PythonAnywhere <developers@pythonanywhere.com>"]
 license = "MIT"
@@ -19,15 +19,15 @@ keywords = ["pythonanywhere", "api", "cloud", "web hosting"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pytest = "^7.0.0"
-pytest-cov = "^3.0.0"
+python-dateutil = "^2.8.2"
 requests = "^2.25.1"
 snakesay = "^0.10.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.0.0"
-pytest-mock = "^3.6.1"
-responses = "^0.13.3"
+pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
+pytest-mock = "^3.10.0"
+responses = "^0.22.0"
 
 [tool.black]
 line-length = 120
