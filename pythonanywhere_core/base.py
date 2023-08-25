@@ -11,6 +11,7 @@ PYTHON_VERSIONS: Dict[str, str] = {
     "3.8": "python38",
     "3.9": "python39",
     "3.10": "python310",
+    "3.11": "python311",
 }
 
 
