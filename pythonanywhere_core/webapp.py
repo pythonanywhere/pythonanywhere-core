@@ -13,6 +13,12 @@ from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiExc
 
 
 class Webapp:
+    """ Interface for PythonAnywhere webapps API.
+    Uses `pythonanywhere_core.base` :method: `get_api_endpoint` to
+    create url, which is stored in a class variable `Webapp.base_url`,
+    then calls `call_api` with appropriate arguments to execute webapps
+    action.
+    """
     def __init__(self, domain: str) -> None:
         self.endpoint = get_api_endpoint()
         self.username = getpass.getuser()
