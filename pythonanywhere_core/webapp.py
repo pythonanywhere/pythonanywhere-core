@@ -18,6 +18,14 @@ class Webapp:
     create url, which is stored in a class variable `Webapp.base_url`,
     then calls `call_api` with appropriate arguments to execute webapps
     action.
+
+    Use :method: `Webapp.create` to create new webapp.
+    Use :method: `Webapp.reload` to reload webapp.
+    Use :method: `Webapp.set_ssl` to set SSL certificate and private key.
+    Use :method: `Webapp.get_ssl_info` to get SSL certificate info.
+    Use :method: `Webapp.delete_log` to delete log file.
+    Use :method: `Webapp.get_log_info` to get log files info.
+
     """
     def __init__(self, domain: str) -> None:
         self.endpoint = get_api_endpoint()
@@ -31,6 +39,7 @@ class Webapp:
         return self.domain == other.domain
 
     def sanity_checks(self, nuke: bool) -> None:
+        """Check that we have a token, and that we don't already have a webapp for this domain"""
         print(snakesay("Running API sanity checks"))
         token = os.environ.get("API_TOKEN")
         if not token:
@@ -54,6 +63,15 @@ class Webapp:
             )
 
     def create(self, python_version: str, virtualenv_path: Path, project_path: Path, nuke: bool) -> None:
+        """Create a webapp for the given domain, using the given python version and virtualenv path
+
+        :param python_version:  python version to use
+        :param virtualenv_path: path to the virtualenv
+        :param project_path: path to the project
+        :param nuke: if True, delete any existing webapp for this domain
+
+        :raises PythonAnywhereApiException: if API call fails
+        """
         print(snakesay("Creating web app via API"))
         if nuke:
             call_api(self.domain_url, "delete")
@@ -73,12 +91,19 @@ class Webapp:
             )
 
     def add_default_static_files_mappings(self, project_path: Path) -> None:
+        """Add default static files mappings for /static/ and /media/
+
+        :param project_path: path to the project
+        """
         print(snakesay("Adding static files mappings for /static/ and /media/"))
         url = f"{self.domain_url}static_files/"
         call_api(url, "post", json=dict(url="/static/", path=str(Path(project_path) / "static")))
         call_api(url, "post", json=dict(url="/media/", path=str(Path(project_path) / "media")))
 
     def reload(self) -> None:
+        """Reload webapp
+
+        :raises PythonAnywhereApiException: if API call fails"""
         print(snakesay(f"Reloading {self.domain} via API"))
         url = f"{self.domain_url}reload/"
         response = call_api(url, "post")
@@ -100,6 +125,11 @@ class Webapp:
             raise PythonAnywhereApiException(f"POST to reload webapp via API failed, got {response}:{response.text}")
 
     def set_ssl(self, certificate: str, private_key: str) -> None:
+        """Set SSL certificate and private key for webapp
+
+        :param certificate: SSL certificate
+        :param private_key: SSL private key
+        """
         print(snakesay(f"Setting up SSL for {self.domain} via API"))
         url = f"{self.domain_url}ssl/"
         response = call_api(url, "post", json={"cert": certificate, "private_key": private_key})
@@ -115,6 +145,7 @@ class Webapp:
             )
 
     def get_ssl_info(self) -> dict[str, Any]:
+        """Get SSL certificate info"""
         url = f"{self.domain_url}ssl/"
         response = call_api(url, "get")
         if not response.ok:
@@ -125,6 +156,13 @@ class Webapp:
         return result
 
     def delete_log(self, log_type: str, index: int = 0) -> None:
+        """Delete log file
+
+        :param log_type: log type (access, error, server)
+        :param index: log file index (0 for current, 1 for previous, etc.)
+
+        :raises PythonAnywhereApiException: if API call fails
+        """
         if index:
             message = f"Deleting old (archive number {index}) {log_type} log file for {self.domain} via API"
         else:
@@ -144,7 +182,12 @@ class Webapp:
         if not response.ok:
             raise PythonAnywhereApiException(f"DELETE log file via API failed, got {response}:{response.text}")
 
-    def get_log_info(self):
+    def get_log_info(self) -> dict:
+        """Get log files info
+
+        :returns: dictionary with log files info
+
+        :raises PythonAnywhereApiException: if API call fails"""
         url = f"{self.files_url}tree/?path=/var/log/"
         response = call_api(url, "get")
         if not response.ok:

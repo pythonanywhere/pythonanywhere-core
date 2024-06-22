@@ -1,0 +1,5 @@
+Files
+=====
+
+.. automodule:: files
+   :members:

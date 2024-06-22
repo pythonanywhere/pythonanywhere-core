@@ -41,6 +41,16 @@ def helpful_token_error_message() -> str:
 
 
 def call_api(url: str, method: str, **kwargs) -> requests.Response:
+    """Calls PythonAnywhere API with given url and method.
+
+    :param url: url to call
+    :param method: HTTP method to use
+    :param kwargs: additional keyword arguments to pass to requests.request
+    :returns: requests.Response object
+
+    :raises AuthenticationError: if API returns 401
+    :raises NoTokenError: if API_TOKEN environment variable is not set"""
+
     token = os.environ.get("API_TOKEN")
     if token is None:
         raise NoTokenError(helpful_token_error_message())
