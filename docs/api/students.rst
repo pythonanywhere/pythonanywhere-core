@@ -1,0 +1,5 @@
+Students
+========
+
+.. automodule:: students
+   :members:
