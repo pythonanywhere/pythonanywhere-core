@@ -46,7 +46,6 @@ def readme_contents():
     )
 
 
-@pytest.mark.files
 def test_path_get_returns_contents_of_directory_when_path_to_dir_provided(
         api_token, api_responses, base_url, default_home_dir_files, home_dir_path
 ):

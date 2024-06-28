@@ -13,7 +13,6 @@ def students_base_url():
     return get_api_endpoint().format(username=getpass.getuser(), flavor="students")
 
 
-@pytest.mark.students
 class TestStudentsAPIGet:
     def test_gets_list_of_students_when_there_are_some(
         self, api_token, api_responses, students_base_url
@@ -38,7 +37,6 @@ class TestStudentsAPIGet:
         assert StudentsAPI().get() == students
 
 
-@pytest.mark.students
 class TestStudentsAPIDelete:
     def test_returns_204_when_student_deleted(
         self, api_token, api_responses, students_base_url
