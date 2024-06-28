@@ -119,16 +119,18 @@ class Files:
     def sharing_post(self, path: str) -> Tuple[int, str]:
         """Starts sharing a file at `path`.
 
-        Returns a tuple with a status code and sharing link on
-        success, raises otherwise.  Status code is 201 on success, 200
-        if file has been already shared."""
+        Returns a tuple with a message and sharing link on
+        success, raises otherwise.  Message is "successfully shared" on success,
+        "was already shared" if file has been already shared."""
 
         url = self.sharing_endpoint
 
         result = call_api(url, "POST", json={"path": path})
 
         if result.ok:
-            return result.status_code, result.json()["url"]
+            msg = {200: "was already shared", 201: "successfully shared"}[result.status_code]
+            sharing_url_suffix = result.json()["url"]
+            return msg, self._make_sharing_url(sharing_url_suffix)
 
         raise PythonAnywhereApiException(
             f"POST to {url} to share '{path}' failed, got {result}{self._error_msg(result)}"

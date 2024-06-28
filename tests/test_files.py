@@ -252,6 +252,7 @@ def test_sharing_post_returns_url_when_path_successfully_shared_or_has_been_shar
 ):
     valid_path = f"{home_dir_path}/README.txt"
     shared_url = f"/user/{username}/shares/asdf1234/"
+    sharing_url = urljoin(base_url.split("api")[0], shared_url)
     partial_response = dict(
         method=responses.POST,
         url=urljoin(base_url, "sharing/"),
@@ -264,13 +265,13 @@ def test_sharing_post_returns_url_when_path_successfully_shared_or_has_been_shar
     files = Files()
     first_share = files.sharing_post(valid_path)
 
-    assert first_share[0] == 201
-    assert first_share[1] == shared_url
+    assert first_share[0] == "successfully shared"
+    assert first_share[1] == sharing_url
 
     second_share = files.sharing_post(valid_path)
 
-    assert second_share[0] == 200
-    assert second_share[1] == shared_url
+    assert second_share[0] == "was already shared"
+    assert second_share[1] == sharing_url
 
 
 @pytest.mark.skip(reason="not implemented in the api yet")
