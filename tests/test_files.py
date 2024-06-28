@@ -248,7 +248,7 @@ def test_path_delete_raises_when_wrong_path_provided(
 
 
 def test_sharing_post_returns_url_when_path_successfully_shared_or_has_been_shared_before(
-        api_token, api_responses, base_url, home_dir_path
+        api_token, api_responses, base_url, home_dir_path, username
 ):
     valid_path = f"{home_dir_path}/README.txt"
     shared_url = f"/user/{username}/shares/asdf1234/"
@@ -297,22 +297,23 @@ def test_sharing_post_raises_exception_when_path_not_provided(
     
 
 def test_sharing_get_returns_sharing_url_when_path_is_shared(
-        api_token, api_responses, base_url, home_dir_path
+        api_token, api_responses, base_url, home_dir_path, username
 ):
     valid_path = f"{home_dir_path}/README.txt"
-    sharing_url = urljoin(base_url, f"sharing/")
+    sharing_api_url = urljoin(base_url, "sharing/")
     get_url = urljoin(base_url, f"sharing/?path={valid_path}")
-    shared_url = f"/user/{username}/shares/asdf1234/"
+    shared_url_suffix = f"/user/{username}/shares/asdf1234/"
+    sharing_url = urljoin(base_url.split("api")[0], shared_url_suffix)
     partial_response = dict(
-        body=bytes(f'{{"url": "{shared_url}"}}', "utf"),
+        body=bytes(f'{{"url": "{shared_url_suffix}"}}', "utf"),
         headers={"Content-Type": "application/json"},
     )
-    api_responses.add(**partial_response, method=responses.POST, url=sharing_url, status=201)
+    api_responses.add(**partial_response, method=responses.POST, url=sharing_api_url, status=201)
     api_responses.add(**partial_response, method=responses.GET, url=get_url, status=200)
     files = Files()
     files.sharing_post(valid_path)
 
-    assert files.sharing_get(valid_path) == shared_url
+    assert files.sharing_get(valid_path) == sharing_url
 
 
 def test_sharing_get_returns_empty_string_when_path_not_shared(
@@ -326,7 +327,7 @@ def test_sharing_get_returns_empty_string_when_path_not_shared(
     
 
 def test_returns_204_on_sucessful_unshare(
-        api_token, api_responses, base_url, home_dir_path
+        api_token, api_responses, base_url, home_dir_path, username
 ):
     valid_path = f"{home_dir_path}/README.txt"
     url = urljoin(base_url, f"sharing/?path={valid_path}")

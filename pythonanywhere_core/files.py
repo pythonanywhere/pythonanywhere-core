@@ -55,6 +55,9 @@ class Files:
             return f": {msg}"
         return ""
 
+    def _make_sharing_url(self, sharing_url_suffix):
+        return urljoin(self.base_url.split("api")[0], sharing_url_suffix)
+
     def path_get(self, path: str) -> Union[dict, bytes]:
         """Returns dictionary of directory contents when `path` is an
         absolute path to of an existing directory or file contents if
@@ -140,8 +143,11 @@ class Files:
         url = f"{self.sharing_endpoint}?path={path}"
 
         result = call_api(url, "GET")
-
-        return result.json()["url"] if result.ok else ""
+        if result.ok:
+            sharing_url_suffix = result.json()["url"]
+            return self._make_sharing_url(sharing_url_suffix)
+        else:
+            return ""
 
     def sharing_delete(self, path: str) -> int:
         """Stops sharing file at `path`.
