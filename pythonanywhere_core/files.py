@@ -116,7 +116,7 @@ class Files:
             f"DELETE on {url} failed, got {result}{self._error_msg(result)}"
         )
 
-    def sharing_post(self, path: str) -> Tuple[int, str]:
+    def sharing_post(self, path: str) -> Tuple[str, str]:
         """Starts sharing a file at `path`.
 
         Returns a tuple with a message and sharing link on
