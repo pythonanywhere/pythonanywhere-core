@@ -41,6 +41,22 @@ def test_get_api_endpoint_gets_domain_from_pythonanywhere_domain_and_adds_on_www
     assert result == "https://www.foo.com/api/v0/user/bill/webapp/"
 
 
+@pytest.mark.parametrize(
+    "flavor,expected_version",
+    [
+        ("files", "v0"),
+        ("schedule", "v0"),
+        ("students", "v0"),
+        ("webapps", "v0"),
+        ("websites", "v1"),
+     ]
+)
+def test_get_api_endpoint_returns_url_with_correct_api_version(flavor, expected_version):
+    result = get_api_endpoint(username="bill", flavor=flavor)
+
+    assert result == f"https://www.pythonanywhere.com/api/{expected_version}/user/bill/{flavor}/"
+
+
 def test_raises_on_401(api_token, api_responses):
     url = "https://foo.com/"
     api_responses.add(responses.POST, url, status=401, body="nope")
