@@ -14,21 +14,31 @@ def mock_requests(mocker):
     return mocker.patch("pythonanywhere_core.base.requests")
 
 
-def test_api_endpoint_defaults_to_pythonanywhere_dot_com_if_no_environment_variables():
-    assert get_api_endpoint() == "https://www.pythonanywhere.com/api/v0/user/{username}/{flavor}/"
+def test_get_api_endpoint_defaults_to_pythonanywhere_dot_com_if_no_environment_variables():
+    result = get_api_endpoint(username="bill", flavor="webapp")
+
+    assert result == "https://www.pythonanywhere.com/api/v0/user/bill/webapp/"
 
 
-def test_gets_domain_from_pythonanywhere_site_and_ignores_pythonanywhere_domain_if_both_set(monkeypatch):
+def test_get_api_endpoint_gets_domain_from_pythonanywhere_site_and_ignores_pythonanywhere_domain_if_both_set(
+        monkeypatch
+):
     monkeypatch.setenv("PYTHONANYWHERE_SITE", "www.foo.com")
     monkeypatch.setenv("PYTHONANYWHERE_DOMAIN", "wibble.com")
 
-    assert get_api_endpoint() == "https://www.foo.com/api/v0/user/{username}/{flavor}/"
+    result = get_api_endpoint(username="bill", flavor="webapp")
+
+    assert result == "https://www.foo.com/api/v0/user/bill/webapp/"
 
 
-def test_gets_domain_from_pythonanywhere_domain_and_adds_on_www_if_set_but_no_pythonanywhere_site(monkeypatch):
+def test_get_api_endpoint_gets_domain_from_pythonanywhere_domain_and_adds_on_www_if_set_but_pythonanywhere_site_is_not(
+        monkeypatch
+):
     monkeypatch.setenv("PYTHONANYWHERE_DOMAIN", "foo.com")
 
-    assert get_api_endpoint() == "https://www.foo.com/api/v0/user/{username}/{flavor}/"
+    result = get_api_endpoint(username="bill", flavor="webapp")
+
+    assert result == "https://www.foo.com/api/v0/user/bill/webapp/"
 
 
 def test_raises_on_401(api_token, api_responses):

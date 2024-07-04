@@ -17,7 +17,7 @@ def username():
 
 @pytest.fixture()
 def base_url(username):
-    return get_api_endpoint().format(username=username, flavor="files")
+    return get_api_endpoint(username=username, flavor="files")
 
 
 @pytest.fixture()
@@ -295,7 +295,7 @@ def test_sharing_post_raises_exception_when_path_not_provided(
         "provided path is not valid"  # or similar
     )
     assert str(e.value) == expected_error_msg
-    
+
 
 def test_sharing_get_returns_sharing_url_when_path_is_shared(
         api_token, api_responses, base_url, home_dir_path, username
@@ -325,7 +325,7 @@ def test_sharing_get_returns_empty_string_when_path_not_shared(
     api_responses.add(method=responses.GET, url=url, status=404)
 
     assert Files().sharing_get(valid_path) == ""
-    
+
 
 def test_returns_204_on_sucessful_unshare(
         api_token, api_responses, base_url, home_dir_path, username
@@ -336,7 +336,7 @@ def test_returns_204_on_sucessful_unshare(
     api_responses.add(method=responses.DELETE, url=url, status=204)
 
     assert Files().sharing_delete(valid_path) == 204
-    
+
 
 def test_returns_list_of_the_regular_files_and_subdirectories_of_a_directory(
         api_token, api_responses, base_url, default_home_dir_files, home_dir_path

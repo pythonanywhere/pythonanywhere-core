@@ -41,7 +41,7 @@ class Files:
     subdirectories of a directory at `path` (limited to 1000 results)
     """
 
-    base_url = get_api_endpoint().format(username=getpass.getuser(), flavor="files")
+    base_url = get_api_endpoint(username=getpass.getuser(), flavor="files")
     path_endpoint = urljoin(base_url, "path")
     sharing_endpoint = urljoin(base_url, "sharing/")
     tree_endpoint = urljoin(base_url, "tree/")

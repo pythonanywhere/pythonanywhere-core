@@ -14,7 +14,7 @@ from pythonanywhere_core.webapp import Webapp
 
 @pytest.fixture
 def base_url():
-    return get_api_endpoint().format(username=getpass.getuser(), flavor="webapps")
+    return get_api_endpoint(username=getpass.getuser(), flavor="webapps")
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def domain():
 
 @pytest.fixture()
 def base_file_url():
-    return get_api_endpoint().format(username=getpass.getuser(), flavor='files')
+    return get_api_endpoint(username=getpass.getuser(), flavor='files')
 
 
 @pytest.fixture

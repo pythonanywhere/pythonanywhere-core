@@ -11,7 +11,7 @@ from pythonanywhere_core.schedule import Schedule
 
 @pytest.fixture
 def task_base_url():
-    return get_api_endpoint().format(username=getpass.getuser(), flavor="schedule")
+    return get_api_endpoint(username=getpass.getuser(), flavor="schedule")
 
 
 @pytest.fixture

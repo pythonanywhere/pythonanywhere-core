@@ -22,7 +22,7 @@ class Schedule:
     Use :method: `Schedule.delete` to delete existing task.
     Use :method: `Schedule.update` to update existing task."""
 
-    base_url: str = get_api_endpoint().format(username=getpass.getuser(), flavor="schedule")
+    base_url: str = get_api_endpoint(username=getpass.getuser(), flavor="schedule")
 
     def create(self, params: dict) -> Optional[dict]:
         """Creates new scheduled task using `params`.

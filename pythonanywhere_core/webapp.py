@@ -28,10 +28,9 @@ class Webapp:
 
     """
     def __init__(self, domain: str) -> None:
-        self.endpoint = get_api_endpoint()
         self.username = getpass.getuser()
-        self.files_url = self.endpoint.format(username=self.username, flavor="files")
-        self.webapps_url = self.endpoint.format(username=self.username, flavor="webapps")
+        self.files_url = get_api_endpoint(username=self.username, flavor="files")
+        self.webapps_url = get_api_endpoint(username=self.username, flavor="webapps")
         self.domain = domain
         self.domain_url = f"{self.webapps_url}{self.domain}/"
 

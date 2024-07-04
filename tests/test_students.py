@@ -10,7 +10,7 @@ from pythonanywhere_core.students import StudentsAPI
 
 @pytest.fixture
 def students_base_url():
-    return get_api_endpoint().format(username=getpass.getuser(), flavor="students")
+    return get_api_endpoint(username=getpass.getuser(), flavor="students")
 
 
 class TestStudentsAPIGet:

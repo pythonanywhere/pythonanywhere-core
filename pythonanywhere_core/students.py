@@ -21,7 +21,7 @@ class StudentsAPI:
     - use :method: `StudentsAPI.delete` to remove a student
     """
 
-    base_url: str = get_api_endpoint().format(username=getpass.getuser(), flavor="students")
+    base_url: str = get_api_endpoint(username=getpass.getuser(), flavor="students")
 
     def get(self) -> Optional[dict]:
         """Returns list of PythonAnywhere students related with user's account."""

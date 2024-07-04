@@ -15,12 +15,12 @@ PYTHON_VERSIONS: Dict[str, str] = {
 }
 
 
-def get_api_endpoint() -> str:
+def get_api_endpoint(username: str, flavor: str) -> str:
     hostname = os.environ.get(
         "PYTHONANYWHERE_SITE",
         "www." + os.environ.get("PYTHONANYWHERE_DOMAIN", "pythonanywhere.com"),
     )
-    return f"https://{hostname}/api/v0/user/{{username}}/{{flavor}}/"
+    return f"https://{hostname}/api/v0/user/{username}/{flavor}/"
 
 
 def helpful_token_error_message() -> str:
