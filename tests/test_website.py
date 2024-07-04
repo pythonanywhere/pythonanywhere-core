@@ -37,8 +37,10 @@ def website_info(domain_name, command):
         "webapp": {
             "command": command,
             "domains": [
-                {"domain_name": domain_name,
-                 "enabled": True}
+                {
+                    "domain_name": domain_name,
+                    "enabled": True
+                }
             ],
             "id": 42
         }
@@ -51,9 +53,16 @@ def test_create_returns_json_with_created_website_info(
     api_responses.add(
         responses.POST, url=webapps_base_url, status=201, body=json.dumps(website_info)
     )
+    expected_request_body = json.dumps(
+        {"domain_name": domain_name, "enabled": True, "webapp": {"command": command}}
+    ).encode()
 
-    assert Website().create(domain_name=domain_name, command=command) == website_info
+    result = Website().create(domain_name=domain_name, command=command)
 
+    assert result == website_info
+    assert api_responses.calls[0].request.body == expected_request_body, (
+        "POST to create needs the payload to be passed as json field"
+    )
 
 def test_get_returns_json_with_info_for_given_domain(
         api_responses, webapps_base_url, website_info, domain_name

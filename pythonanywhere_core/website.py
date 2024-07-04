@@ -11,7 +11,7 @@ class Website:
         response = call_api(
             self.api_endpoint,
             "post",
-            data={
+            json={
                 "domain_name": domain_name,
                 "enabled": True,
                 "webapp": {"command": command}
