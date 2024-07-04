@@ -13,7 +13,7 @@ def _get_temp_dir():
 
 
 @pytest.fixture
-def api_responses(monkeypatch):
+def api_responses():
     with responses.RequestsMock() as r:
         yield r
 
