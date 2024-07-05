@@ -1,6 +1,5 @@
 import getpass
 import json
-from urllib.parse import urljoin
 
 import pytest
 import responses
