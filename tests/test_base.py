@@ -34,6 +34,7 @@ def test_get_api_endpoint_gets_domain_from_pythonanywhere_site_and_ignores_pytho
 def test_get_api_endpoint_gets_domain_from_pythonanywhere_domain_and_adds_on_www_if_set_but_pythonanywhere_site_is_not(
         monkeypatch
 ):
+    monkeypatch.delenv("PYTHONANYWHERE_SITE", raising=False)
     monkeypatch.setenv("PYTHONANYWHERE_DOMAIN", "foo.com")
 
     result = get_api_endpoint(username="bill", flavor="webapp")
@@ -81,9 +82,11 @@ def test_verify_is_true_if_env_not_set(api_token, mock_requests):
     assert kwargs["verify"] is True
 
 
-def test_raises_with_helpful_message_if_no_token_present(mocker):
+def test_raises_with_helpful_message_if_no_token_present(mocker, monkeypatch):
     mock_helpful_message = mocker.patch("pythonanywhere_core.base.helpful_token_error_message")
     mock_helpful_message.return_value = "I'm so helpful"
+
+    monkeypatch.delenv("API_TOKEN", raising=False)
 
     with pytest.raises(NoTokenError) as exc:
         call_api("blah", "get")
@@ -97,5 +100,7 @@ def test_helpful_message_inside_pythonanywhere(monkeypatch):
     assert "Oops, you don't seem to have an API token." in helpful_token_error_message()
 
 
-def test_helpful_message_outside_pythonanywhere():
+def test_helpful_message_outside_pythonanywhere(monkeypatch):
+    monkeypatch.delenv("PYTHONANYWHERE_SITE", raising=False)
+
     assert "Oops, you don't seem to have an API_TOKEN environment variable set." in helpful_token_error_message()
