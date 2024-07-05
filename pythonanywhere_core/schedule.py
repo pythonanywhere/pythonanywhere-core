@@ -10,7 +10,7 @@ from pythonanywhere_core.exceptions import PythonAnywhereApiException
 class Schedule:
     """Interface for PythonAnywhere scheduled tasks API.
 
-    Uses `pythonanywhere.api` :method: `get_api_endpoint` to create url,
+    Uses `pythonanywhere_core.api` :method: `get_api_endpoint` to create url,
     which is stored in a class variable `Schedule.base_url`, then calls
     `call_api` with appropriate arguments to execute scheduled tasks tasks
     actions. Covers 'GET' and 'POST' methods for tasks list, as well as

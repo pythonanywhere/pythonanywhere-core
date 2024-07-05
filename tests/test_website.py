@@ -64,14 +64,47 @@ def test_create_returns_json_with_created_website_info(
         "POST to create needs the payload to be passed as json field"
     )
 
+
 def test_get_returns_json_with_info_for_given_domain(
         api_responses, webapps_base_url, website_info, domain_name
 ):
     api_responses.add(
         responses.GET,
-        url=urljoin(webapps_base_url, domain_name),
+        url=f"{webapps_base_url}{domain_name}/",
         status=200,
         body=json.dumps(website_info)
     )
 
     assert Website().get(domain_name=domain_name) == website_info
+
+
+def test_list_returns_json_with_info_for_all_websites(api_responses, webapps_base_url, website_info):
+    api_responses.add(
+        responses.GET,
+        url=webapps_base_url,
+        status=200,
+        body=json.dumps([website_info])
+    )
+
+    assert Website().list() == [website_info]
+
+
+def test_reloads_website(api_responses, domain_name, webapps_base_url):
+    api_responses.add(
+        responses.POST,
+        url=f"{webapps_base_url}{domain_name}/reload/",
+        status=200,
+        body=json.dumps({"status": "OK"})
+    )
+
+    assert Website().reload(domain_name=domain_name) == {"status": "OK"}
+
+
+def test_deletes_website(api_responses, domain_name, webapps_base_url):
+    api_responses.add(
+        responses.DELETE,
+        url=f"{webapps_base_url}{domain_name}/",
+        status=204,
+    )
+
+    assert Website().delete(domain_name=domain_name) == {}

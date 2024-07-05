@@ -50,7 +50,7 @@ def test_get_api_endpoint_gets_domain_from_pythonanywhere_domain_and_adds_on_www
         ("students", "v0"),
         ("webapps", "v0"),
         ("websites", "v1"),
-     ]
+    ]
 )
 def test_get_api_endpoint_returns_url_with_correct_api_version(flavor, expected_version):
     result = get_api_endpoint(username="bill", flavor=flavor)
