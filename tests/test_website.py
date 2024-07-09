@@ -33,6 +33,11 @@ def website_info(domain_name, command):
         "enabled": True,
         "id": 42,
         "user": getpass.getuser(),
+        "logfiles": {
+            "access": f"/var/log/{domain_name}.access.log",
+            "error": f"/var/log/{domain_name}.error.log",
+            "server": f"/var/log/{domain_name}.server.log",
+        },
         "webapp": {
             "command": command,
             "domains": [
