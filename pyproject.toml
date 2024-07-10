@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pythonanywhere-core"
-version = "0.1.9"
+version = "0.1.10"
 description = "API wrapper for programmatic management of PythonAnywhere services."
 authors = ["PythonAnywhere <developers@pythonanywhere.com>"]
 license = "MIT"
