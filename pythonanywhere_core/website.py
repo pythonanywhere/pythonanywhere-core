@@ -1,6 +1,8 @@
 import getpass
 
 from pythonanywhere_core.base import call_api, get_api_endpoint
+from pythonanywhere_core.exceptions import PythonAnywhereApiException
+
 
 
 class Website:
@@ -68,6 +70,26 @@ class Website:
             f"{self.api_endpoint}{domain_name}/reload/",
             "post",
         )
+        return response.json()
+
+    def auto_ssl(self, domain_name: str) -> dict:
+        """Creates and applies a Let's Encrypt certificate for ``domain_name``.
+        :param domain_name: domain name for website to apply the certificate to
+        :return: dictionary with response"""
+        response = call_api(
+            f"{self.api_endpoint}{domain_name}/ssl/",
+            "post",
+            json={"cert_type": "letsencrypt-auto-renew"}
+        )
+        return response.json()
+
+    def get_ssl_info(self, domain_name) -> dict:
+        """Get SSL certificate info"""
+        url = f"{self.api_endpoint}{domain_name}/ssl/"
+        response = call_api(url, "get")
+        if not response.ok:
+            raise PythonAnywhereApiException(f"GET SSL details via API failed, got {response}:{response.text}")
+
         return response.json()
 
     def delete(self, domain_name: str) -> dict:

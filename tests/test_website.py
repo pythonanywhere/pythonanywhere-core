@@ -5,6 +5,7 @@ import pytest
 import responses
 
 from pythonanywhere_core.base import get_api_endpoint
+from pythonanywhere_core.exceptions import PythonAnywhereApiException
 from pythonanywhere_core.website import Website
 
 
@@ -112,3 +113,44 @@ def test_deletes_website(api_responses, domain_name, webapps_base_url):
     )
 
     assert Website().delete(domain_name=domain_name) == {}
+
+
+def test_sets_lets_encrypt_cert(api_responses, domain_name, webapps_base_url):
+    api_responses.add(
+        responses.POST,
+        url=f"{webapps_base_url}{domain_name}/ssl/",
+        body=json.dumps({"status": "OK"}),
+        status=200
+    )
+
+
+    assert Website().auto_ssl(domain_name=domain_name) == {"status": "OK"}
+
+    assert json.loads(api_responses.calls[0].request.body.decode()) == {
+        "cert_type": "letsencrypt-auto-renew"
+    }
+
+
+def test_returns_ssl_info(api_responses, domain_name, webapps_base_url):
+    api_responses.add(
+        responses.GET,
+        url=f"{webapps_base_url}{domain_name}/ssl/",
+        body=json.dumps({"status": "OK"}),
+        status=200
+    )
+
+    assert Website().get_ssl_info(domain_name=domain_name) == {"status": "OK"}
+
+
+def test_raises_if_ssl_info_does_not_return_200(api_responses, domain_name, webapps_base_url):
+    api_responses.add(
+        responses.GET,
+        url=f"{webapps_base_url}{domain_name}/ssl/",
+        status=404, body="nope"
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as e:
+        Website().get_ssl_info(domain_name=domain_name)
+
+    assert "GET SSL details via API failed, got" in str(e.value)
+    assert "nope" in str(e.value)
