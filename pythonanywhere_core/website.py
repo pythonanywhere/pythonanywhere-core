@@ -20,7 +20,9 @@ class Website:
     Use :method: ``Website.delete`` to delete website.
     """
 
-    api_endpoint = get_api_endpoint(username=getpass.getuser(), flavor="websites")
+    def __init__(self) -> None:
+        self.websites_base_url = get_api_endpoint(username=getpass.getuser(), flavor="websites")
+        self.domains_base_url = get_api_endpoint(username=getpass.getuser(), flavor="domains")
 
     def create(self, domain_name: str, command: str) -> dict:
         """Creates new website with ``domain_name`` and ``command``.
@@ -30,7 +32,7 @@ class Website:
         :returns: dictionary with created website info"""
 
         response = call_api(
-            self.api_endpoint,
+            self.websites_base_url,
             "post",
             json={
                 "domain_name": domain_name,
@@ -48,7 +50,7 @@ class Website:
         :return: dictionary with website info"""
 
         response = call_api(
-            f"{self.api_endpoint}{domain_name}/",
+            f"{self.websites_base_url}{domain_name}/",
             "get",
         )
         return response.json()
@@ -58,7 +60,7 @@ class Website:
         :return: list of dictionaries with websites info"""
 
         response = call_api(
-            self.api_endpoint,
+            self.websites_base_url,
             "get",
         )
         return response.json()
@@ -69,7 +71,7 @@ class Website:
         :return: dictionary with response"""
 
         response = call_api(
-            f"{self.api_endpoint}{domain_name}/reload/",
+            f"{self.websites_base_url}{domain_name}/reload/",
             "post",
         )
         return response.json()
@@ -79,7 +81,7 @@ class Website:
         :param domain_name: domain name for website to apply the certificate to
         :return: dictionary with response"""
         response = call_api(
-            f"{self.api_endpoint}{domain_name}/ssl/",
+            f"{self.domains_base_url}{domain_name}/ssl/",
             "post",
             json={"cert_type": "letsencrypt-auto-renew"}
         )
@@ -87,7 +89,7 @@ class Website:
 
     def get_ssl_info(self, domain_name) -> dict:
         """Get SSL certificate info"""
-        url = f"{self.api_endpoint}{domain_name}/ssl/"
+        url = f"{self.domains_base_url}{domain_name}/ssl/"
         response = call_api(url, "get")
         if not response.ok:
             raise PythonAnywhereApiException(f"GET SSL details via API failed, got {response}:{response.text}")
@@ -100,7 +102,7 @@ class Website:
         :return: empty dictionary"""
 
         call_api(
-            f"{self.api_endpoint}{domain_name}/",
+            f"{self.websites_base_url}{domain_name}/",
             "delete",
         )
         return {}

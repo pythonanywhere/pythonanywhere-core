@@ -13,8 +13,13 @@ pytestmark = pytest.mark.usefixtures("api_token")
 
 
 @pytest.fixture
-def webapps_base_url():
+def websites_base_url():
     return get_api_endpoint(username=getpass.getuser(), flavor="websites")
+
+
+@pytest.fixture
+def domains_base_url():
+    return get_api_endpoint(username=getpass.getuser(), flavor="domains")
 
 
 @pytest.fixture
@@ -53,10 +58,10 @@ def website_info(domain_name, command):
 
 
 def test_create_returns_json_with_created_website_info(
-        api_responses, webapps_base_url, website_info, domain_name, command
+        api_responses, websites_base_url, website_info, domain_name, command
 ):
     api_responses.add(
-        responses.POST, url=webapps_base_url, status=201, body=json.dumps(website_info)
+        responses.POST, url=websites_base_url, status=201, body=json.dumps(website_info)
     )
     expected_request_body = json.dumps(
         {"domain_name": domain_name, "enabled": True, "webapp": {"command": command}}
@@ -71,11 +76,11 @@ def test_create_returns_json_with_created_website_info(
 
 
 def test_get_returns_json_with_info_for_given_domain(
-        api_responses, webapps_base_url, website_info, domain_name
+        api_responses, websites_base_url, website_info, domain_name
 ):
     api_responses.add(
         responses.GET,
-        url=f"{webapps_base_url}{domain_name}/",
+        url=f"{websites_base_url}{domain_name}/",
         status=200,
         body=json.dumps(website_info)
     )
@@ -83,10 +88,10 @@ def test_get_returns_json_with_info_for_given_domain(
     assert Website().get(domain_name=domain_name) == website_info
 
 
-def test_list_returns_json_with_info_for_all_websites(api_responses, webapps_base_url, website_info):
+def test_list_returns_json_with_info_for_all_websites(api_responses, websites_base_url, website_info):
     api_responses.add(
         responses.GET,
-        url=webapps_base_url,
+        url=websites_base_url,
         status=200,
         body=json.dumps([website_info])
     )
@@ -94,10 +99,10 @@ def test_list_returns_json_with_info_for_all_websites(api_responses, webapps_bas
     assert Website().list() == [website_info]
 
 
-def test_reloads_website(api_responses, domain_name, webapps_base_url):
+def test_reloads_website(api_responses, domain_name, websites_base_url):
     api_responses.add(
         responses.POST,
-        url=f"{webapps_base_url}{domain_name}/reload/",
+        url=f"{websites_base_url}{domain_name}/reload/",
         status=200,
         body=json.dumps({"status": "OK"})
     )
@@ -105,20 +110,20 @@ def test_reloads_website(api_responses, domain_name, webapps_base_url):
     assert Website().reload(domain_name=domain_name) == {"status": "OK"}
 
 
-def test_deletes_website(api_responses, domain_name, webapps_base_url):
+def test_deletes_website(api_responses, domain_name, websites_base_url):
     api_responses.add(
         responses.DELETE,
-        url=f"{webapps_base_url}{domain_name}/",
+        url=f"{websites_base_url}{domain_name}/",
         status=204,
     )
 
     assert Website().delete(domain_name=domain_name) == {}
 
 
-def test_sets_lets_encrypt_cert(api_responses, domain_name, webapps_base_url):
+def test_sets_lets_encrypt_cert(api_responses, domain_name, domains_base_url):
     api_responses.add(
         responses.POST,
-        url=f"{webapps_base_url}{domain_name}/ssl/",
+        url=f"{domains_base_url}{domain_name}/ssl/",
         body=json.dumps({"status": "OK"}),
         status=200
     )
@@ -131,10 +136,10 @@ def test_sets_lets_encrypt_cert(api_responses, domain_name, webapps_base_url):
     }
 
 
-def test_returns_ssl_info(api_responses, domain_name, webapps_base_url):
+def test_returns_ssl_info(api_responses, domain_name, domains_base_url):
     api_responses.add(
         responses.GET,
-        url=f"{webapps_base_url}{domain_name}/ssl/",
+        url=f"{domains_base_url}{domain_name}/ssl/",
         body=json.dumps({"status": "OK"}),
         status=200
     )
@@ -142,10 +147,10 @@ def test_returns_ssl_info(api_responses, domain_name, webapps_base_url):
     assert Website().get_ssl_info(domain_name=domain_name) == {"status": "OK"}
 
 
-def test_raises_if_ssl_info_does_not_return_200(api_responses, domain_name, webapps_base_url):
+def test_raises_if_ssl_info_does_not_return_200(api_responses, domain_name, domains_base_url):
     api_responses.add(
         responses.GET,
-        url=f"{webapps_base_url}{domain_name}/ssl/",
+        url=f"{domains_base_url}{domain_name}/ssl/",
         status=404, body="nope"
     )
 
