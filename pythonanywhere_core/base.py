@@ -20,7 +20,7 @@ def get_api_endpoint(username: str, flavor: str) -> str:
         "PYTHONANYWHERE_SITE",
         "www." + os.environ.get("PYTHONANYWHERE_DOMAIN", "pythonanywhere.com"),
     )
-    if flavor == "websites":
+    if flavor == "websites" or flavor == "domains":
         return f"https://{hostname}/api/v1/user/{username}/{flavor}/"
     return f"https://{hostname}/api/v0/user/{username}/{flavor}/"
 
