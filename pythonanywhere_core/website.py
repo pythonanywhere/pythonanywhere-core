@@ -40,8 +40,6 @@ class Website:
                 "webapp": {"command": command}
             }
         )
-        if not response.ok:
-            raise PythonAnywhereApiException(f"POST to create webapp via API failed, got {response}:{response.text}")
         return response.json()
 
     def get(self, domain_name: str) -> dict:
