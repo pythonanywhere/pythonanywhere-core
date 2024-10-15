@@ -9,37 +9,34 @@ from pythonanywhere_core.exceptions import PythonAnywhereApiException
 
 
 class Files:
-    """ Interface for PythonAnywhere files API.
-
-    Uses `pythonanywhere_core.base` :method: `get_api_endpoint` to
-    create url, which is stored in a class variable `Files.base_url`,
-    then calls `call_api` with appropriate arguments to execute files
-    action.
-
-    Covers:
-    - GET, POST and DELETE for files path endpoint
-    - POST, GET and DELETE for files sharing endpoint
-    - GET for tree endpoint
-
-    "path" methods:
-    - use :method: `Files.path_get` to get contents of file or
-    directory from `path`
-    - use :method: `Files.path_post` to upload or update file at given
-    `dest_path` using contents from `source`
-    - use :method: `Files.path_delete` to delete file/directory on on
-    given `path`
-
-    "sharing" methods:
-    - use :method: `Files.sharing_post` to enable sharing a file from
-    `path` (if not shared before) and get a link to it
-    - use :method: `Files.sharing_get` to get sharing url for `path`
-    - use :method: `Files.sharing_delete` to disable sharing for
-    `path`
-
-    "tree" method:
-    - use :method: `Files.tree_get` to get list of regular files and
-    subdirectories of a directory at `path` (limited to 1000 results)
     """
+    Interface for the PythonAnywhere Files API.
+
+    This class uses the `get_api_endpoint` function from ``pythonanywhere_core.base``
+    to construct the API URL, which is stored in the class variable ``base_url``.
+    It then calls the ``call_api`` method with the appropriate arguments to
+    perform file-related actions.
+
+    Supported Endpoints:
+        - `GET`, `POST`, and `DELETE` for the files path endpoint.
+        - `POST`, `GET`, and `DELETE` for the file sharing endpoint.
+        - `GET` for the tree endpoint.
+
+    Path Methods:
+        - :meth:`Files.path_get`: Retrieve the contents of a file or directory from a specified `path`.
+        - :meth:`Files.path_post`: Upload or update a file at the given `dest_path` using contents from `source`.
+        - :meth:`Files.path_delete`: Delete a file or directory at the specified `path`.
+
+    Sharing Methods:
+        - :meth:`Files.sharing_post`: Enable sharing of a file from the given `path` (if not already shared) and get a link to it.
+        - :meth:`Files.sharing_get`: Retrieve the sharing URL for a specified `path`.
+        - :meth:`Files.sharing_delete`: Disable sharing for a specified `path`.
+
+    Tree Method:
+        - :meth:`Files.tree_get`: Retrieve a list of regular files and subdirectories of a directory at the specified `path`
+          (limited to 1000 results).
+    """
+
 
     base_url = get_api_endpoint(username=getpass.getuser(), flavor="files")
     path_endpoint = urljoin(base_url, "path")

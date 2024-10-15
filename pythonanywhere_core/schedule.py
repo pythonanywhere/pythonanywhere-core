@@ -8,19 +8,25 @@ from pythonanywhere_core.exceptions import PythonAnywhereApiException
 
 
 class Schedule:
-    """Interface for PythonAnywhere scheduled tasks API.
+    """
+    Interface for the PythonAnywhere Scheduled Tasks API.
 
-    Uses `pythonanywhere_core.api` :method: `get_api_endpoint` to create url,
-    which is stored in a class variable `Schedule.base_url`, then calls
-    `call_api` with appropriate arguments to execute scheduled tasks tasks
-    actions. Covers 'GET' and 'POST' methods for tasks list, as well as
-    'GET', 'PATCH' and 'DELETE' methods for task with id.
+    This class uses the `get_api_endpoint` function from ``pythonanywhere_core.api``
+    to construct the API URL, which is stored in the class variable ``base_url``.
+    It then calls the ``call_api`` method with appropriate arguments to perform
+    actions related to scheduled tasks.
 
-    Use :method: `Schedule.get_list` to get all tasks list.
-    Use :method: `Schedule.create` to create new task.
-    Use :method: `Schedule.get_specs` to get existing task specs.
-    Use :method: `Schedule.delete` to delete existing task.
-    Use :method: `Schedule.update` to update existing task."""
+    Supported HTTP Methods:
+        - `GET` and `POST` for the tasks list.
+        - `GET`, `PATCH`, and `DELETE` for tasks with an ID.
+
+    Methods:
+        - :meth:`Schedule.get_list`: Retrieve the list of all scheduled tasks.
+        - :meth:`Schedule.create`: Create a new scheduled task.
+        - :meth:`Schedule.get_specs`: Retrieve the specifications of an existing task.
+        - :meth:`Schedule.delete`: Delete an existing task.
+        - :meth:`Schedule.update`: Update an existing task.
+    """
 
     base_url: str = get_api_endpoint(username=getpass.getuser(), flavor="schedule")
 

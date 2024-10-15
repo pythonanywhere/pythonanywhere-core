@@ -19,13 +19,13 @@ class Webapp:
     then calls `call_api` with appropriate arguments to execute webapps
     action.
 
-    Use :method: `Webapp.create` to create new webapp.
-    Use :method: `Webapp.reload` to reload webapp.
-    Use :method: `Webapp.set_ssl` to set SSL certificate and private key.
-    Use :method: `Webapp.get_ssl_info` to get SSL certificate info.
-    Use :method: `Webapp.delete_log` to delete log file.
-    Use :method: `Webapp.get_log_info` to get log files info.
-
+    Methods:
+        - :meth:`Webapp.create`: Create a new webapp.
+        - :meth:`Webapp.reload`: Reload the webapp.
+        - :meth:`Webapp.set_ssl`: Set the SSL certificate and private key.
+        - :meth:`Webapp.get_ssl_info`: Retrieve SSL certificate information.
+        - :meth:`Webapp.delete_log`: Delete a log file.
+        - :meth:`Webapp.get_log_info`: Retrieve log file information.
     """
     def __init__(self, domain: str) -> None:
         self.username = getpass.getuser()

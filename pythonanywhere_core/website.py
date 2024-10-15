@@ -8,16 +8,19 @@ from pythonanywhere_core.exceptions import PythonAnywhereApiException
 class Website:
     """ Interface for PythonAnywhere websites API.
 
-    Uses ``pythonanywhere_core.base`` :method: ``get_api_endpoint`` to
+    Uses ``pythonanywhere_core.base`` function ``get_api_endpoint`` to
     create url, which is stored in a class variable ``Website.api_endpoint``,
     then calls ``call_api`` with appropriate arguments to execute websites
     action.
 
-    Use :method: ``Website.create`` to create new website.
-    Use :method: ``Website.get`` to get website info.
-    Use :method: ``Website.list`` to get all websites list.
-    Use :method: ``Website.reload`` to reload website.
-    Use :method: ``Website.delete`` to delete website.
+    Methods:
+        - :meth:`Website.create`: Create a new website.
+        - :meth:`Website.get`: Retrieve information about a specific website.
+        - :meth:`Website.list`: Get a list of all websites.
+        - :meth:`Website.reload`: Reload the website.
+        - :meth:`Website.auto_ssl`: Create and apply a Let's Encrypt SSL certificate.
+        - :meth:`Website.get_ssl_info`: Get SSL certificate information.
+        - :meth:`Website.delete`: Delete a website.
     """
 
     def __init__(self) -> None:
@@ -86,7 +89,9 @@ class Website:
         return response.json()
 
     def get_ssl_info(self, domain_name) -> dict:
-        """Get SSL certificate info"""
+        """Get SSL certificate info
+        :param domain_name: domain name for website to get SSL info
+        :return: dictionary with SSL certificate info"""
         url = f"{self.domains_base_url}{domain_name}/ssl/"
         response = call_api(url, "get")
         if not response.ok:

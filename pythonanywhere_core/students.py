@@ -5,26 +5,30 @@ from pythonanywhere_core.base import call_api, get_api_endpoint
 
 
 class StudentsAPI:
-    """Interface for PythonAnywhere students API.
+    """
+    Interface for the PythonAnywhere Students API.
 
-    Uses `pythonanywhere.api.base` :method: `get_api_endpoint` to
-    create url, which is stored in a class variable `StudentsAPI.base_url`,
-    then calls `call_api` with appropriate arguments to execute student
-    action.
+    This class uses the `get_api_endpoint` function from
+    ``pythonanywhere.api.base`` to construct the API URL, which is stored
+    in the class variable ``base_url``. It then calls the ``call_api`` method
+    with the appropriate arguments to perform student-related actions.
 
-    Covers:
-    - GET
-    - DELETE
+    Supported HTTP Methods:
+        - `GET`
+        - `DELETE`
 
     Methods:
-    - use :method: `StudentsAPI.get` to get list of students
-    - use :method: `StudentsAPI.delete` to remove a student
+        - :meth:`StudentsAPI.get`: Retrieve a list of students.
+        - :meth:`StudentsAPI.delete`: Remove a student.
     """
 
     base_url: str = get_api_endpoint(username=getpass.getuser(), flavor="students")
 
     def get(self) -> Optional[dict]:
-        """Returns list of PythonAnywhere students related with user's account."""
+        """Returns list of PythonAnywhere students related with user's account.
+
+        :returns: dictionary with students info
+        """
 
         result = call_api(self.base_url, "GET")
 
@@ -34,7 +38,11 @@ class StudentsAPI:
         raise Exception(f"GET to list students failed, got {result.text}")
 
     def delete(self, student_username: str) -> Optional[int]:
-        """Returns 204 if student has been successfully removed, raises otherwise."""
+        """Returns 204 if student has been successfully removed, raises otherwise.
+
+        :param student_username: student username to be removed
+        :returns: 204 if student has been successfully removed
+        """
 
         url = f"{self.base_url}{student_username}"
 
