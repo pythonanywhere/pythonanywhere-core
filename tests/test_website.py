@@ -3,6 +3,7 @@ import json
 
 import pytest
 import responses
+from unittest.mock import patch
 
 from pythonanywhere_core.base import get_api_endpoint
 from pythonanywhere_core.exceptions import PythonAnywhereApiException
@@ -188,3 +189,11 @@ def test_website_sanity_check_tests_api_token_present(api_responses, websites_ba
         Website().sanity_check(domain_name=domain_name, nuke=False)
     
     assert "Could not find your API token" in str(e.value)
+
+
+@patch('pythonanywhere_core.website.Website.sanity_check')
+def test_create_website_calls_sanity_check(mock_sanity_check, api_responses, websites_base_url, website_info, domain_name, command):
+    mock_sanity_check.side_effect = SanityException('Boom!')
+
+    with pytest.raises(SanityException):
+        Website().create(domain_name=domain_name, command=command, nuke=False)

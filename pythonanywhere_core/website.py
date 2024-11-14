@@ -58,12 +58,14 @@ class Website:
             )
 
 
-    def create(self, domain_name: str, command: str) -> dict:
+    def create(self, domain_name: str, command: str, nuke: bool = False) -> dict:
         """Creates new website with ``domain_name`` and ``command``.
 
         :param domain_name: domain name for new website
         :param command: command for new website
         :returns: dictionary with created website info"""
+
+        self.sanity_check(domain_name, nuke)
 
         response = call_api(
             self.websites_base_url,
