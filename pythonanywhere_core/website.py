@@ -1,8 +1,10 @@
+import os
 import getpass
+from snakesay import snakesay
+from textwrap import dedent
 
 from pythonanywhere_core.base import call_api, get_api_endpoint
-from pythonanywhere_core.exceptions import PythonAnywhereApiException
-
+from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException
 
 
 class Website:
@@ -26,6 +28,35 @@ class Website:
     def __init__(self) -> None:
         self.websites_base_url = get_api_endpoint(username=getpass.getuser(), flavor="websites")
         self.domains_base_url = get_api_endpoint(username=getpass.getuser(), flavor="domains")
+
+    def sanity_check(self, domain_name: str, nuke: bool = False) -> None:
+        """Check that we have a token, and that we don't already have a webapp for this domain"""
+        print(snakesay("Running API sanity checks"))
+        token = os.environ.get("API_TOKEN")
+        if not token:
+            raise SanityException(
+                dedent(
+                    """
+                Could not find your API token.
+                You may need to create it on the Accounts page?
+                You will also need to close this console and open a new one once you've done that.
+                """
+                )
+            )
+
+        if nuke:
+            return
+
+        response = call_api(
+            f"{self.websites_base_url}{domain_name}/",
+             "get"
+        )
+
+        if response.status_code == 200:
+            raise SanityException(
+                f"You already have a webapp for {domain_name}.\n\nUse the --nuke option if you want to replace it."
+            )
+
 
     def create(self, domain_name: str, command: str) -> dict:
         """Creates new website with ``domain_name`` and ``command``.

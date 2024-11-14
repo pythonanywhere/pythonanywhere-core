@@ -7,6 +7,7 @@ import responses
 from pythonanywhere_core.base import get_api_endpoint
 from pythonanywhere_core.exceptions import PythonAnywhereApiException
 from pythonanywhere_core.website import Website
+from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException
 
 
 pytestmark = pytest.mark.usefixtures("api_token")
@@ -159,3 +160,31 @@ def test_raises_if_ssl_info_does_not_return_200(api_responses, domain_name, doma
 
     assert "GET SSL details via API failed, got" in str(e.value)
     assert "nope" in str(e.value)
+
+
+def test_website_sanity_check_domain_already_exists(api_responses, websites_base_url, website_info, domain_name):
+    api_responses.add(
+        responses.GET,
+        url=f"{websites_base_url}{domain_name}/",
+        status=200,
+        body=json.dumps(website_info)
+    )
+
+    with pytest.raises(SanityException) as e:
+        Website().sanity_check(domain_name=domain_name, nuke=False)
+
+
+def test_website_sanity_check_can_be_bypassed_with_nuke_option(api_responses, websites_base_url, website_info, domain_name):
+    # Test that the sanity check does not raise an exception
+    Website().sanity_check(domain_name=domain_name, nuke=True)
+
+
+def test_website_sanity_check_tests_api_token_present(api_responses, websites_base_url, website_info, domain_name):
+    import os 
+    del os.environ["API_TOKEN"]
+
+    # Test that the sanity check does not raise an exception
+    with pytest.raises(SanityException) as e:
+        Website().sanity_check(domain_name=domain_name, nuke=False)
+    
+    assert "Could not find your API token" in str(e.value)
