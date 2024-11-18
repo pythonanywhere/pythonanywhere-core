@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pythonanywhere-core"
-version = "0.2.2"
+version = "0.2.3"
 description = "API wrapper for programmatic management of PythonAnywhere services."
 authors = ["PythonAnywhere <developers@pythonanywhere.com>"]
 license = "MIT"
@@ -22,7 +22,7 @@ keywords = ["pythonanywhere", "api", "cloud", "web hosting"]
 python = "^3.8"
 python-dateutil = "^2.8.2"
 requests = "^2.30.0"
-snakesay = "^0.10.2"
+snakesay = "^0.10.3"
 typing_extensions = "^4.5.0"
 
 [tool.poetry.dev-dependencies]
