@@ -614,13 +614,13 @@ files = [
 
 [[package]]
 name = "snakesay"
-version = "0.10.2"
+version = "0.10.3"
 description = "speaking snake"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "snakesay-0.10.2-py3-none-any.whl", hash = "sha256:d36f209d2900eca68de32a49a7649769f9c6e0aec0e449a05653a4ce5cdf114b"},
-    {file = "snakesay-0.10.2.tar.gz", hash = "sha256:db2a60e0a89e3fec2183be9407fd6abfb709be0d9223d9422d4dd6297652c7e3"},
+    {file = "snakesay-0.10.3-py3-none-any.whl", hash = "sha256:0a601a0c408deba05a20b11ba2f0db336b1915274601053ef8de3a6b354c60fc"},
+    {file = "snakesay-0.10.3.tar.gz", hash = "sha256:6346aa7231b1970efc6fa8b3ea78bd015b3d5a7e33ba709c17e00bcc3328f93f"},
 ]
 
 [[package]]
