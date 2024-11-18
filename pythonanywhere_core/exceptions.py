@@ -12,3 +12,7 @@ class PythonAnywhereApiException(Exception):
 
 class NoTokenError(PythonAnywhereApiException):
     pass
+
+
+class DomainAlreadyExistsException(PythonAnywhereApiException):
+    pass

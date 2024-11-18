@@ -6,9 +6,8 @@ import responses
 from unittest.mock import patch
 
 from pythonanywhere_core.base import get_api_endpoint
-from pythonanywhere_core.exceptions import PythonAnywhereApiException
+from pythonanywhere_core.exceptions import PythonAnywhereApiException, DomainAlreadyExistsException
 from pythonanywhere_core.website import Website
-from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException
 
 
 pytestmark = pytest.mark.usefixtures("api_token")
@@ -75,6 +74,39 @@ def test_create_returns_json_with_created_website_info(
     assert api_responses.calls[0].request.body == expected_request_body, (
         "POST to create needs the payload to be passed as json field"
     )
+
+
+def test_create_raises_when_domain_name_already_exists(
+    api_responses,
+    websites_base_url,
+    domain_name,
+    command
+):
+    with pytest.raises(DomainAlreadyExistsException):
+        api_responses.add(
+            responses.POST,
+            url=websites_base_url,
+            status=400,
+            body=json.dumps({"domain_name":["domain with this domain name already exists."]})
+        )
+        Website().create(domain_name=domain_name, command=command)
+
+def test_raises_with_api_error_message_for_any_other_error(
+    api_responses,
+    websites_base_url,
+    domain_name,
+    command
+):
+    with pytest.raises(PythonAnywhereApiException) as e:
+        api_responses.add(
+            responses.POST,
+            url=websites_base_url,
+            status=400,
+            body=json.dumps({"message":["Something went wrong."]})
+        )
+        Website().create(domain_name=domain_name, command=command)
+
+    assert "Something went wrong." in str(e)
 
 
 def test_get_returns_json_with_info_for_given_domain(
@@ -161,39 +193,3 @@ def test_raises_if_ssl_info_does_not_return_200(api_responses, domain_name, doma
 
     assert "GET SSL details via API failed, got" in str(e.value)
     assert "nope" in str(e.value)
-
-
-def test_website_sanity_check_domain_already_exists(api_responses, websites_base_url, website_info, domain_name):
-    api_responses.add(
-        responses.GET,
-        url=f"{websites_base_url}{domain_name}/",
-        status=200,
-        body=json.dumps(website_info)
-    )
-
-    with pytest.raises(SanityException) as e:
-        Website().sanity_check(domain_name=domain_name, nuke=False)
-
-
-def test_website_sanity_check_can_be_bypassed_with_nuke_option(api_responses, websites_base_url, website_info, domain_name):
-    # Test that the sanity check does not raise an exception
-    Website().sanity_check(domain_name=domain_name, nuke=True)
-
-
-def test_website_sanity_check_tests_api_token_present(api_responses, websites_base_url, website_info, domain_name):
-    import os 
-    del os.environ["API_TOKEN"]
-
-    # Test that the sanity check does not raise an exception
-    with pytest.raises(SanityException) as e:
-        Website().sanity_check(domain_name=domain_name, nuke=False)
-    
-    assert "Could not find your API token" in str(e.value)
-
-
-@patch('pythonanywhere_core.website.Website.sanity_check')
-def test_create_website_calls_sanity_check(mock_sanity_check, api_responses, websites_base_url, website_info, domain_name, command):
-    mock_sanity_check.side_effect = SanityException('Boom!')
-
-    with pytest.raises(SanityException):
-        Website().create(domain_name=domain_name, command=command, nuke=False)
