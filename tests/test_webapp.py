@@ -1,6 +1,7 @@
 import getpass
 import json
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 import responses
@@ -209,29 +210,35 @@ def test_ignores_404_from_delete_call_when_nuking(api_responses, api_token, base
     webapp.create("3.10", "/virtualenv/path", "/project/path", nuke=True)
 
 
-def test_does_two_posts_to_static_files_endpoint(api_token, api_responses, domain_url, webapp):
+def test_create_static_file_mapping_posts_correctly(api_token, api_responses, domain_url, webapp):
     static_files_url = f"{domain_url}static_files/"
     api_responses.add(responses.POST, static_files_url, status=201)
-    api_responses.add(responses.POST, static_files_url, status=201)
 
-    webapp.add_default_static_files_mappings("/project/path")
+    webapp.create_static_file_mapping("/assets/", "/project/assets")
 
-    post1 = api_responses.calls[0]
-    assert post1.request.url == static_files_url
-    assert post1.request.headers["content-type"] == "application/json"
-    assert post1.request.headers["Authorization"] == f"Token {api_token}"
-    assert json.loads(post1.request.body.decode("utf8")) == {
-        "url": "/static/",
-        "path": "/project/path/static",
+    post = api_responses.calls[0]
+    assert post.request.url == static_files_url
+    assert post.request.headers["content-type"] == "application/json"
+    assert post.request.headers["Authorization"] == f"Token {api_token}"
+    assert json.loads(post.request.body.decode("utf8")) == {
+        "url": "/assets/",
+        "path": "/project/assets",
     }
-    post2 = api_responses.calls[1]
-    assert post2.request.url == static_files_url
-    assert post2.request.headers["content-type"] == "application/json"
-    assert post2.request.headers["Authorization"] == f"Token {api_token}"
-    assert json.loads(post2.request.body.decode("utf8")) == {
-        "url": "/media/",
-        "path": "/project/path/media",
-    }
+
+
+def test_adds_default_static_files_mappings(mocker, webapp):
+    mock_create = mocker.patch.object(webapp, "create_static_file_mapping")
+
+    project_path = "/directory/path"
+    webapp.add_default_static_files_mappings(project_path)
+
+    mock_create.assert_has_calls(
+        [
+            mocker.call("/static/", Path(project_path) / "static"),
+            mocker.call("/media/", Path(project_path) / "media"),
+        ]
+    )
+
 
 
 def test_does_post_to_reload_url(api_responses, api_token, domain_url, webapp):

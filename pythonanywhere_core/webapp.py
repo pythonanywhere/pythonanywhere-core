@@ -88,14 +88,22 @@ class Webapp:
                 "PATCH to set virtualenv path and source directory via API failed," f"got {response}:{response.text}"
             )
 
+    def create_static_file_mapping(self, url_path: str, directory_path: Path) -> None:
+        """Create a static file mapping via the API.
+
+        :param url_path: URL path (e.g., '/static/')
+        :param directory_path: Filesystem path to serve (as Path)
+        """
+        url = f"{self.domain_url}static_files/"
+        call_api(url, "post", json=dict(url=url_path, path=str(directory_path)))
+
     def add_default_static_files_mappings(self, project_path: Path) -> None:
         """Add default static files mappings for /static/ and /media/
 
         :param project_path: path to the project
         """
-        url = f"{self.domain_url}static_files/"
-        call_api(url, "post", json=dict(url="/static/", path=str(Path(project_path) / "static")))
-        call_api(url, "post", json=dict(url="/media/", path=str(Path(project_path) / "media")))
+        self.create_static_file_mapping("/static/", Path(project_path) / "static")
+        self.create_static_file_mapping("/media/", Path(project_path) / "media")
 
     def reload(self) -> None:
         """Reload webapp
