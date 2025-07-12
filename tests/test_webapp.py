@@ -447,3 +447,34 @@ def test_raises_if_get_does_not_20x(api_responses, api_token, base_file_url, web
 
     assert "GET log files info via API failed" in str(e.value)
     assert "nope" in str(e.value)
+
+
+def test_list_webapps_returns_list(api_responses, api_token, base_url):
+    # Simulate API response for listing webapps
+    webapps_data = [
+        {"id": 1, "domain_name": "www.domain1.com"},
+        {"id": 2, "domain_name": "www.domain2.com"},
+    ]
+    api_responses.add(
+        responses.GET,
+        base_url,
+        status=200,
+        body=json.dumps(webapps_data),
+    )
+    result = Webapp.list_webapps()
+    assert isinstance(result, list)
+    assert result == webapps_data
+
+
+def test_list_webapps_raises_on_error(api_responses, api_token, base_url):
+    api_responses.add(
+        responses.GET,
+        base_url,
+        status=500,
+        body="server error",
+    )
+    with pytest.raises(PythonAnywhereApiException) as e:
+        Webapp.list_webapps()
+    assert "GET webapps via API failed" in str(e.value)
+    assert "server error" in str(e.value)
+

@@ -21,16 +21,21 @@ class Webapp:
 
     Methods:
         - :meth:`Webapp.create`: Create a new webapp.
+        - :meth:`Webapp.create_static_file_mapping`: Create a static file mapping.
         - :meth:`Webapp.reload`: Reload the webapp.
         - :meth:`Webapp.set_ssl`: Set the SSL certificate and private key.
         - :meth:`Webapp.get_ssl_info`: Retrieve SSL certificate information.
         - :meth:`Webapp.delete_log`: Delete a log file.
         - :meth:`Webapp.get_log_info`: Retrieve log file information.
+
+    Class Methods:
+        - :meth:`Webapp.list_webapps`: List all webapps for the current user.
     """
+    username = getpass.getuser()
+    files_url = get_api_endpoint(username=username, flavor="files")
+    webapps_url = get_api_endpoint(username=username, flavor="webapps")
+
     def __init__(self, domain: str) -> None:
-        self.username = getpass.getuser()
-        self.files_url = get_api_endpoint(username=self.username, flavor="files")
-        self.webapps_url = get_api_endpoint(username=self.username, flavor="webapps")
         self.domain = domain
         self.domain_url = f"{self.webapps_url}{self.domain}/"
 
@@ -215,3 +220,14 @@ class Webapp:
                         continue
                     logs[log_type].append(log_index)
         return logs
+
+    @classmethod
+    def list_webapps(cls) -> list:
+        """List all webapps for the current user.
+
+        :returns: list of webapps info as dictionaries
+        """
+        response = call_api(cls.webapps_url, "get")
+        if not response.ok:
+            raise PythonAnywhereApiException(f"GET webapps via API failed, got {response}:{response.text}")
+        return response.json()
