@@ -71,7 +71,6 @@ class Webapp:
 
         :raises PythonAnywhereApiException: if API call fails
         """
-        print(snakesay("Creating web app via API"))
         if nuke:
             call_api(self.domain_url, "delete")
         response = call_api(
@@ -94,7 +93,6 @@ class Webapp:
 
         :param project_path: path to the project
         """
-        print(snakesay("Adding static files mappings for /static/ and /media/"))
         url = f"{self.domain_url}static_files/"
         call_api(url, "post", json=dict(url="/static/", path=str(Path(project_path) / "static")))
         call_api(url, "post", json=dict(url="/media/", path=str(Path(project_path) / "media")))
@@ -103,7 +101,6 @@ class Webapp:
         """Reload webapp
 
         :raises PythonAnywhereApiException: if API call fails"""
-        print(snakesay(f"Reloading {self.domain} via API"))
         url = f"{self.domain_url}reload/"
         response = call_api(url, "post")
         if not response.ok:
