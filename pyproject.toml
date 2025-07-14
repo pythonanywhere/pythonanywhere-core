@@ -1,13 +1,10 @@
 [tool.poetry]
 name = "pythonanywhere-core"
-version = "0.2.5"
+version = "0.2.4"
 description = "API wrapper for programmatic management of PythonAnywhere services."
 authors = ["PythonAnywhere <developers@pythonanywhere.com>"]
 license = "MIT"
 readme = "README.rst"
-homepage = "https://github.com/pythonanywhere/pythonanywhere-core"
-repository = "https://github.com/pythonanywhere/pythonanywhere-core"
-documentation = "https://core.pythonanywhere.com"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -17,6 +14,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.8",
 ]
 keywords = ["pythonanywhere", "api", "cloud", "web hosting"]
 
