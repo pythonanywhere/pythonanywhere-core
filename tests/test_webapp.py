@@ -65,6 +65,7 @@ def webapp_info(domain):
         "password_protection_password": "bar"
     }
 
+# WEBAPP CLASS
 
 def test_init(base_url, domain, domain_url, webapp):
     assert webapp.domain == domain
@@ -79,6 +80,8 @@ def test_compare_equal():
 def test_compare_not_equal():
     assert Webapp("www.my-domain.com") != Webapp("www.other-domain.com")
 
+# SANITY CHECKS
+## /api/v0/user/{username}/webapps/{domain_name}/ : GET
 
 def test_does_not_complain_if_api_token_exists(api_token, api_responses, domain_url, webapp):
     api_responses.add(responses.GET, domain_url, status=404)
@@ -119,6 +122,10 @@ def test_nuke_option_overrides_all_but_token_check(
 
     webapp.sanity_checks(nuke=True)  # should not raise
 
+
+# CREATE
+## /api/v0/user/{username}/webapps/ : POST
+## /api/v0/user/{username}/webapps/{domain_name} : PATCH
 
 def test_does_post_to_create_webapp(api_responses, api_token, base_url, domain, domain_url, webapp):
     api_responses.add(
@@ -208,6 +215,9 @@ def test_raises_if_patch_does_not_20x(api_responses, api_token, base_url, domain
     assert "an error" in str(e.value)
 
 
+## /api/v0/user/{username}/webapps/{domain_name}/
+## DELETE (for nuke functionality in CREATE)
+
 def test_does_delete_first_for_nuke_call(api_responses, api_token, base_url, domain_url, webapp):
     api_responses.add(responses.DELETE, domain_url, status=200)
     api_responses.add(responses.POST, base_url, status=201, body=json.dumps({"status": "OK"}))
@@ -228,6 +238,9 @@ def test_ignores_404_from_delete_call_when_nuking(api_responses, api_token, base
 
     webapp.create("3.10", "/virtualenv/path", "/project/path", nuke=True)
 
+
+# CREATE STATIC FILE MAPPING
+## /api/v0/user/{username}/webapps/{domain_name}/static_files/ : POST
 
 def test_create_static_file_mapping_posts_correctly(api_token, api_responses, domain_url, webapp):
     static_files_url = f"{domain_url}static_files/"
@@ -258,6 +271,9 @@ def test_adds_default_static_files_mappings(mocker, webapp):
         ]
     )
 
+
+# RELOAD
+## /api/v0/user/{username}/webapps/{domain_name}/reload/ : POST
 
 def test_does_post_to_reload_url(api_responses, api_token, domain_url, webapp):
     reload_url = f"{domain_url}reload/"
@@ -294,6 +310,9 @@ def test_does_not_raise_if_post_responds_with_a_cname_error(api_responses, api_t
     webapp.reload()  # Should not raise
 
 
+# SET SSL
+## /api/v0/user/{username}/webapps/{domain_name}/ssl/ : POST
+
 def test_does_post_to_ssl_url(api_responses, api_token, domain_url, webapp):
     ssl_url = f"{domain_url}ssl/"
     api_responses.add(responses.POST, ssl_url, status=200)
@@ -320,6 +339,9 @@ def test_raises_if_post_to_ssl_does_not_20x(api_responses, api_token, ssl_url, w
     assert "POST to set SSL details via API failed" in str(e.value)
     assert "nope" in str(e.value)
 
+
+# GET SSL INFO
+## /api/v0/user/{username}/webapps/{domain_name}/ssl/ : GET
 
 def test_returns_json_from_server_having_parsed_expiry_with_z_for_utc_and_no_separators(
     api_responses, api_token, ssl_url, webapp
@@ -391,6 +413,9 @@ def test_raises_if_get_does_not_return_200(api_responses, api_token, ssl_url, we
     assert "nope" in str(e.value)
 
 
+# DELETE LOG
+## /api/v0/user/{username}/files/path{path} : DELETE
+
 def test_delete_current_access_log(api_responses, api_token, base_log_url, webapp):
     expected_url = f"{base_log_url}.access.log/"
     api_responses.add(responses.DELETE, expected_url, status=200)
@@ -425,6 +450,9 @@ def test_raises_if_log_delete_does_not_20x(api_responses, api_token, base_log_ur
     assert "DELETE log file via API failed" in str(e.value)
     assert "nope" in str(e.value)
 
+
+# GET LOG INFO
+## /api/v0/user/{username}/files/tree/?path={path} : GET
 
 def test_get_list_of_logs(api_responses, api_token, base_file_url, domain, webapp):
     expected_url = f"{base_file_url}tree/?path=/var/log/"
@@ -467,6 +495,9 @@ def test_raises_if_get_does_not_20x(api_responses, api_token, base_file_url, web
     assert "nope" in str(e.value)
 
 
+# LIST WEBAPPS
+## /api/v0/user/{username}/webapps/ : GET
+
 def test_list_webapps_returns_list(api_responses, api_token, base_url):
     # Simulate API response for listing webapps
     webapps_data = [
@@ -497,9 +528,8 @@ def test_list_webapps_raises_on_error(api_responses, api_token, base_url):
     assert "server error" in str(e.value)
 
 
-# /api/v0/user/{username}/webapps/{domain_name}/
-## GET
-
+# GET
+## /api/v0/user/{username}/webapps/{domain_name}/
 
 def test_get_to_domain_name_endpoint_returns_200_with_webapp_info_when_domain_name_exists(
         api_responses, api_token, domain_url, webapp, webapp_info
@@ -534,8 +564,8 @@ def test_get_to_domain_name_endpoint_returns_403_for_not_authorized_user(
     assert '{"detail":"You do not have permission to perform this action."}' in str(e.value)
 
 
-# /api/v0/user/{username}/webapps/{domain_name}/
-## DELETE
+# DELETE
+## /api/v0/user/{username}/webapps/{domain_name}/
 
 def test_delete_to_domain_name_endpoint_returns_204_for_authorized_user_and_existing_webapp(
         api_responses, api_token, domain_url, webapp
@@ -572,9 +602,8 @@ def test_delete_to_domain_name_endpoint_returns_403_for_authorized_user_and_non_
     assert message in str(e.value)
 
 
-# /api/v0/user/{username}/webapps/{domain_name}/
-## PATCH
-
+# PATCH
+## /api/v0/user/{username}/webapps/{domain_name}/
 
 def test_patch_to_domain_name_endpoint_returns_200_for_authorized_user_and_existing_webapp(
         api_responses, api_token, domain_url, webapp, webapp_info
