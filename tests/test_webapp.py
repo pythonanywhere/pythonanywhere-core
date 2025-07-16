@@ -47,6 +47,25 @@ def webapp(domain):
     return Webapp(domain)
 
 
+@pytest.fixture
+def webapp_info(domain):
+    username = getpass.getuser()
+    return {
+        "id": 2097234,
+        "user": username,
+        "domain_name": domain,
+        "python_version": "3.10",
+        "source_directory": f"/home/{username}/mysite",
+        "working_directory": f"/home/{username}/",
+        "virtualenv_path": "",
+        "expiry": "2025-10-16",
+        "force_https": False,
+        "password_protection_enabled": False,
+        "password_protection_username": "foo",
+        "password_protection_password": "bar"
+    }
+
+
 def test_init(base_url, domain, domain_url, webapp):
     assert webapp.domain == domain
     assert webapp.webapps_url == base_url
@@ -238,7 +257,6 @@ def test_adds_default_static_files_mappings(mocker, webapp):
             mocker.call("/media/", Path(project_path) / "media"),
         ]
     )
-
 
 
 def test_does_post_to_reload_url(api_responses, api_token, domain_url, webapp):
@@ -478,3 +496,124 @@ def test_list_webapps_raises_on_error(api_responses, api_token, base_url):
     assert "GET webapps via API failed" in str(e.value)
     assert "server error" in str(e.value)
 
+
+# /api/v0/user/{username}/webapps/{domain_name}/
+## GET
+
+
+def test_get_to_domain_name_endpoint_returns_200_with_webapp_info_when_domain_name_exists(
+        api_responses, api_token, domain_url, webapp, webapp_info
+):
+    api_responses.add(
+        responses.GET,
+        domain_url,
+        status=200,
+        body=json.dumps(webapp_info)
+    )
+
+    response = webapp.get()
+
+    for key, value in webapp_info.items():
+        assert response[key] == value
+
+
+def test_get_to_domain_name_endpoint_returns_403_for_not_authorized_user(
+        api_responses, api_token, domain, domain_url, webapp
+):
+    api_responses.add(
+        responses.GET,
+        domain_url,
+        status=403,
+        body='{"detail":"You do not have permission to perform this action."}',
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as e:
+        webapp.get()
+
+    assert f"GET webapp for {domain} via API failed" in str(e.value)
+    assert '{"detail":"You do not have permission to perform this action."}' in str(e.value)
+
+
+# /api/v0/user/{username}/webapps/{domain_name}/
+## DELETE
+
+def test_delete_to_domain_name_endpoint_returns_204_for_authorized_user_and_existing_webapp(
+        api_responses, api_token, domain_url, webapp
+):
+    api_responses.add(
+        responses.DELETE,
+        domain_url,
+        status=204,
+    )
+
+    webapp.delete()
+
+    request, response = api_responses.calls[0]
+    assert request.url == domain_url
+    assert request.method == "DELETE"
+    assert response.status_code == 204
+
+
+def test_delete_to_domain_name_endpoint_returns_403_for_authorized_user_and_non_existing_webapp(
+        api_responses, api_token, domain, domain_url, webapp
+):
+    message = '{"detail":"You do not have permission to perform this action."}'
+    api_responses.add(
+        responses.DELETE,
+        domain_url,
+        status=403,
+        body=message
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as e:
+        webapp.delete()
+
+    assert f"DELETE webapp for {domain} via API failed" in str(e.value)
+    assert message in str(e.value)
+
+
+# /api/v0/user/{username}/webapps/{domain_name}/
+## PATCH
+
+
+def test_patch_to_domain_name_endpoint_returns_200_for_authorized_user_and_existing_webapp(
+        api_responses, api_token, domain_url, webapp, webapp_info
+):
+    new_force_https = not webapp_info["force_https"]
+    webapp_info["force_https"] = new_force_https
+
+    api_responses.add(
+        responses.PATCH,
+        domain_url,
+        status=200,
+        body=json.dumps(webapp_info)
+    )
+
+    response = webapp.patch({"force_https": new_force_https, "non-supported-field": "foo"})
+
+    for key, value in webapp_info.items():
+        if key == "force_https":
+            assert response[key] == new_force_https
+        else:
+            assert response[key] == value
+
+        assert "non-supported-field" not in response
+
+
+def test_patch_to_domain_name_endpoint_returns_403_for_authorized_user_and_non_existing_webapp(
+        api_responses, api_token, domain, domain_url, webapp
+):
+    message = '{"detail":"You do not have permission to perform this action."}'
+    data = {"force_https": True}
+    api_responses.add(
+        responses.PATCH,
+        domain_url,
+        status=403,
+        body=message
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as e:
+        webapp.patch(data)
+
+    assert f"PATCH webapp for {domain} via API failed" in str(e.value)
+    assert message in str(e.value)
