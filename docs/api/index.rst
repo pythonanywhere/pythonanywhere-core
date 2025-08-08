@@ -8,6 +8,7 @@ Programming Interface
 
    base
    files
+   resources
    schedule
    students
    webapp
