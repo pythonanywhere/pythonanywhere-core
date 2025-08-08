@@ -58,7 +58,7 @@ jobs:
         shell: bash
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3
+        uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3.4.3
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
@@ -109,7 +109,7 @@ jobs:
         virtualenvs-in-project: true
 
     - name: Cache Poetry dependencies
-      uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3
+      uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3.4.3
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
