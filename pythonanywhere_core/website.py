@@ -1,7 +1,5 @@
-import os
 import getpass
-from snakesay import snakesay
-from textwrap import dedent
+
 
 from pythonanywhere_core.base import call_api, get_api_endpoint
 from pythonanywhere_core.exceptions import DomainAlreadyExistsException, PythonAnywhereApiException
