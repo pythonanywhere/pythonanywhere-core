@@ -23,7 +23,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1
+        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1
         with:
           version: latest
           virtualenvs-create: true
@@ -58,7 +58,7 @@ jobs:
         shell: bash
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
@@ -102,14 +102,14 @@ jobs:
         python-version: '3.13'
 
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1
       with:
         version: latest
         virtualenvs-create: true
         virtualenvs-in-project: true
 
     - name: Cache Poetry dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
@@ -123,7 +123,7 @@ jobs:
       run: cd docs && poetry run sphinx-build -b html . _build
 
     - name: Setup SSH key
-      uses: webfactory/ssh-agent@v0.8.0
+      uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
       with:
         ssh-private-key: ${{ secrets.DOCS_DEPLOY_SSH_KEY }}
 
