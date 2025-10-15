@@ -649,15 +649,18 @@ files = [
 
 [[package]]
 name = "snakesay"
-version = "0.10.3"
+version = "0.10.4"
 description = "speaking snake"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "snakesay-0.10.3-py3-none-any.whl", hash = "sha256:0a601a0c408deba05a20b11ba2f0db336b1915274601053ef8de3a6b354c60fc"},
-    {file = "snakesay-0.10.3.tar.gz", hash = "sha256:6346aa7231b1970efc6fa8b3ea78bd015b3d5a7e33ba709c17e00bcc3328f93f"},
+    {file = "snakesay-0.10.4-py3-none-any.whl", hash = "sha256:44eed09dc6d0e0ee9ea76a642bf591f5f5309dcefc59670a3b07c09bcf6952d1"},
+    {file = "snakesay-0.10.4.tar.gz", hash = "sha256:d5765fbab9c7dd73cd20472614ba8eeb5066a743a88ff7cd9ae1d8d00aef326f"},
 ]
+
+[package.extras]
+dev = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "snowballstemmer"
