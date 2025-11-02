@@ -4,6 +4,11 @@ It's a core code behind `PythonAnywhere cli tool`_.
 
 .. _PythonAnywhere cli tool: https://pypi.org/project/pythonanywhere/
 
+Documentation
+=============
+
+Full documentation is available at https://core.pythonanywhere.com/
+
 
 Development
 ===========

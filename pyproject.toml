@@ -5,6 +5,9 @@ description = "API wrapper for programmatic management of PythonAnywhere service
 authors = ["PythonAnywhere <developers@pythonanywhere.com>"]
 license = "MIT"
 readme = "README.rst"
+homepage = "https://core.pythonanywhere.com/"
+documentation = "https://core.pythonanywhere.com/"
+repository = "https://github.com/pythonanywhere/pythonanywhere-core"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

@@ -17,7 +17,16 @@ author = 'PythonAnywhere'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc",]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
+]
+
+# Intersphinx configuration - links to other project docs
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+}
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
