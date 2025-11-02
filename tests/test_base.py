@@ -66,20 +66,6 @@ def test_raises_on_401(api_token, api_responses):
     assert str(e.value) == "Authentication error 401 calling API: nope"
 
 
-def test_passes_verify_from_environment(api_token, monkeypatch, mock_requests):
-    monkeypatch.setenv("PYTHONANYWHERE_INSECURE_API", "true")
-
-    call_api("url", "post", foo="bar")
-
-    _, kwargs = mock_requests.request.call_args
-    assert kwargs["verify"] is False
-
-
-def test_verify_is_true_if_env_not_set(api_token, mock_requests):
-    call_api("url", "post", foo="bar")
-
-    _, kwargs = mock_requests.request.call_args
-    assert kwargs["verify"] is True
 
 
 def test_raises_with_helpful_message_if_no_token_present(mocker, monkeypatch):

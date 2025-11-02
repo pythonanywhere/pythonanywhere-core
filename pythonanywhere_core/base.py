@@ -59,12 +59,10 @@ def call_api(url: str, method: str, **kwargs) -> requests.Response:
     token = os.environ.get("API_TOKEN")
     if token is None:
         raise NoTokenError(helpful_token_error_message())
-    insecure = os.environ.get("PYTHONANYWHERE_INSECURE_API") == "true"
     response = requests.request(
         method=method,
         url=url,
         headers={"Authorization": f"Token {token}"},
-        verify=not insecure,
         **kwargs,
     )
     if response.status_code == 401:
