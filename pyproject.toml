@@ -28,7 +28,7 @@ snakesay = "^0.10.3"
 typing_extensions = "^4.5.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
+pytest = "^9.0.0"
 pytest-cov = "^7.0.0"
 pytest-mock = "^3.10.0"
 responses = "^0.25.0"
