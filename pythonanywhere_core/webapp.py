@@ -7,10 +7,9 @@ from textwrap import dedent
 from typing import Any
 
 from dateutil.parser import parse
-from snakesay import snakesay
 
 from pythonanywhere_core.base import call_api, get_api_endpoint, PYTHON_VERSIONS
-from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException
+from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException, MissingCNAMEException
 
 
 class Webapp:
@@ -54,7 +53,6 @@ class Webapp:
 
         :raises SanityException: if API token is missing or webapp already exists
         """
-        print(snakesay("Running API sanity checks"))
         token = os.environ.get("API_TOKEN")
         if not token:
             raise SanityException(
@@ -127,24 +125,13 @@ class Webapp:
     def reload(self) -> None:
         """Reload webapp
 
+        :raises MissingCNAMEException: if CNAME not found (reload succeeded)
         :raises PythonAnywhereApiException: if API call fails"""
         url = f"{self.domain_url}reload/"
         response = call_api(url, "post")
         if not response.ok:
             if response.status_code == 409 and response.json()["error"] == "cname_error":
-                print(
-                    snakesay(
-                        dedent(
-                            """
-                            Could not find a CNAME for your website.  If you're using an A record,
-                            CloudFlare, or some other way of pointing your domain at PythonAnywhere
-                            then that should not be a problem.  If you're not, you should double-check
-                            your DNS setup.
-                        """
-                        )
-                    )
-                )
-                return
+                raise MissingCNAMEException()
             raise PythonAnywhereApiException(f"POST to reload webapp via API failed, got {response}:{response.text}")
 
     def set_ssl(self, certificate: str, private_key: str) -> None:
@@ -155,7 +142,6 @@ class Webapp:
 
         :raises PythonAnywhereApiException: if API call fails
         """
-        print(snakesay(f"Setting up SSL for {self.domain} via API"))
         url = f"{self.domain_url}ssl/"
         response = call_api(url, "post", json={"cert": certificate, "private_key": private_key})
         if not response.ok:
@@ -193,12 +179,6 @@ class Webapp:
 
         :raises PythonAnywhereApiException: if API call fails
         """
-        if index:
-            message = f"Deleting old (archive number {index}) {log_type} log file for {self.domain} via API"
-        else:
-            message = f"Deleting current {log_type} log file for {self.domain} via API"
-        print(snakesay(message))
-
         if index == 1:
             suffix = ".1"
         elif index > 1:
