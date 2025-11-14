@@ -1,8 +1,10 @@
 import os
+import platform
 from typing import Dict
 
 import requests
 
+from pythonanywhere_core import __version__
 from pythonanywhere_core.exceptions import AuthenticationError, NoTokenError
 
 PYTHON_VERSIONS: Dict[str, str] = {
@@ -54,15 +56,35 @@ def call_api(url: str, method: str, **kwargs) -> requests.Response:
     :returns: requests.Response object
 
     :raises AuthenticationError: if API returns 401
-    :raises NoTokenError: if API_TOKEN environment variable is not set"""
+    :raises NoTokenError: if API_TOKEN environment variable is not set
+
+    Client identification can be provided via PYTHONANYWHERE_CLIENT environment
+    variable (e.g., "pa/1.0.0" or "mcp-server/0.5.0") to help with usage analytics.
+    """
 
     token = os.environ.get("API_TOKEN")
     if token is None:
         raise NoTokenError(helpful_token_error_message())
+
+    base_user_agent = f"pythonanywhere-core/{__version__}"
+    client_info = os.environ.get("PYTHONANYWHERE_CLIENT")
+
+    if client_info:
+        user_agent = f"{base_user_agent} ({client_info}; Python/{platform.python_version()})"
+    else:
+        user_agent = f"{base_user_agent} (Python/{platform.python_version()})"
+
+    headers = {
+        "Authorization": f"Token {token}",
+        "User-Agent": user_agent
+    }
+    if "headers" in kwargs:
+        headers.update(kwargs.pop("headers"))
+
     response = requests.request(
         method=method,
         url=url,
-        headers={"Authorization": f"Token {token}"},
+        headers=headers,
         **kwargs,
     )
     if response.status_code == 401:

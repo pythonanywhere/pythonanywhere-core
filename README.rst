@@ -1,6 +1,10 @@
-API wrapper for programmatic management of PythonAnywhere services.
+pythonanywhere-core
+===================
 
-It's a core code behind `PythonAnywhere cli tool`_.
+Python SDK for PythonAnywhere API - programmatic management of PythonAnywhere
+services including webapps, files, scheduled tasks, students, and websites.
+
+Core library behind the `PythonAnywhere cli tool`_.
 
 .. _PythonAnywhere cli tool: https://pypi.org/project/pythonanywhere/
 
@@ -8,7 +12,6 @@ Documentation
 =============
 
 Full documentation is available at https://core.pythonanywhere.com/
-
 
 Development
 ===========
