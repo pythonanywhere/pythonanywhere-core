@@ -9,7 +9,7 @@ from dateutil.tz import tzutc
 from urllib.parse import urlencode
 
 from pythonanywhere_core.base import get_api_endpoint, PYTHON_VERSIONS
-from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException
+from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException, MissingCNAMEException
 from pythonanywhere_core.webapp import Webapp
 
 
@@ -298,7 +298,7 @@ def test_raises_if_post_does_not_20x_that_is_not_a_cname_error(api_responses, ap
     assert "nope" in str(e.value)
 
 
-def test_does_not_raise_if_post_responds_with_a_cname_error(api_responses, api_token, domain_url, webapp):
+def test_raises_missing_cname_exception_on_cname_error(api_responses, api_token, domain_url, webapp):
     reload_url = f"{domain_url}reload/"
     api_responses.add(
         responses.POST,
@@ -307,7 +307,10 @@ def test_does_not_raise_if_post_responds_with_a_cname_error(api_responses, api_t
         json={"status": "error", "error": "cname_error"},
     )
 
-    webapp.reload()  # Should not raise
+    with pytest.raises(MissingCNAMEException) as e:
+        webapp.reload()
+
+    assert "Could not find a CNAME for your website" in str(e.value)
 
 
 # SET SSL
