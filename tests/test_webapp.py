@@ -194,6 +194,25 @@ def test_raises_if_post_returns_a_200_with_status_error(api_responses, api_token
     assert "bad things happened" in str(e.value)
 
 
+def test_does_patch_without_virtualenv_path_when_none(
+    api_responses, api_token, base_url, domain_url, webapp
+):
+    api_responses.add(
+        responses.POST,
+        base_url,
+        status=201,
+        body=json.dumps({"status": "OK"}),
+    )
+    api_responses.add(responses.PATCH, domain_url, status=200)
+
+    webapp.create("3.10", virtualenv_path=None, project_path="/project/path", nuke=False)
+
+    patch = api_responses.calls[1]
+    assert patch.request.url == domain_url
+    assert patch.request.body == urlencode({"source_directory": "/project/path"})
+    assert "virtualenv_path" not in patch.request.body
+
+
 def test_raises_if_patch_does_not_20x(api_responses, api_token, base_url, domain_url, webapp):
     api_responses.add(
         responses.POST,

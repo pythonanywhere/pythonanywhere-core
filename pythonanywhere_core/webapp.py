@@ -74,11 +74,11 @@ class Webapp:
                 f"You already have a webapp for {self.domain}.\n\nUse the --nuke option if you want to replace it."
             )
 
-    def create(self, python_version: str, virtualenv_path: Path, project_path: Path, nuke: bool) -> None:
+    def create(self, python_version: str, virtualenv_path: Path | None, project_path: Path, nuke: bool) -> None:
         """Create a webapp for the given domain, using the given python version and virtualenv path
 
         :param python_version:  python version to use
-        :param virtualenv_path: path to the virtualenv
+        :param virtualenv_path: path to the virtualenv, or None to skip setting it
         :param project_path: path to the project
         :param nuke: if True, delete any existing webapp for this domain
 
