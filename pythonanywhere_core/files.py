@@ -1,4 +1,5 @@
 import getpass
+from pathlib import Path
 from typing import Tuple, Union
 from urllib.parse import urljoin
 
@@ -174,3 +175,23 @@ class Files:
             return result.json()
 
         raise PythonAnywhereApiException(f"GET to {url} failed, got {result}{self._error_msg(result)}")
+
+    def tree_post(self, local_dir_path: str, remote_dir_path: str) -> None:
+        """Uploads contents of a local directory to remote path on
+        PythonAnywhere.  Walks `local_dir_path` recursively and uploads
+        each file using :meth:`path_post`, preserving directory structure.
+
+        Raises :exc:`PythonAnywhereApiException` on first upload failure."""
+
+        local_dir = Path(local_dir_path)
+        if not local_dir.is_dir():
+            raise ValueError(f"{local_dir_path} is not a directory")
+        for path in sorted(local_dir.rglob("*")):
+            if path.is_file():
+                relative = path.relative_to(local_dir)
+                remote_path = f"{remote_dir_path}/{relative}"
+                self.path_post(remote_path, path.read_bytes())
+            elif path.is_dir() and not any(path.iterdir()):
+                placeholder = f"{remote_dir_path}/{path.relative_to(local_dir)}/.empty"
+                self.path_post(placeholder, b"")
+                self.path_delete(placeholder)

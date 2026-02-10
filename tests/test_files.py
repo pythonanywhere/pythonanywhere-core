@@ -399,3 +399,88 @@ def test_raises_when_path_does_not_exist(
         f"GET to {url} failed, got <Response [400]>: {invalid_path} does not exist"
     )
     assert str(e.value) == expected_error_msg
+
+
+def test_tree_post_uploads_single_file(
+        api_token, api_responses, base_url, home_dir_path, tmp_path
+):
+    (tmp_path / "index.html").write_bytes(b"<h1>hello</h1>")
+    remote_dir = f"{home_dir_path}/myapp"
+    remote_file_url = f"{base_url}path{remote_dir}/index.html"
+    api_responses.add(responses.POST, url=remote_file_url, status=201)
+
+    Files().tree_post(str(tmp_path), remote_dir)
+
+    assert len(api_responses.calls) == 1
+    assert api_responses.calls[0].request.url == remote_file_url
+
+
+def test_tree_post_preserves_nested_structure(
+        api_token, api_responses, base_url, home_dir_path, tmp_path
+):
+    (tmp_path / "index.html").write_bytes(b"<h1>hello</h1>")
+    (tmp_path / "static" / "css").mkdir(parents=True)
+    (tmp_path / "static" / "css" / "style.css").write_bytes(b"body {}")
+    (tmp_path / "static" / "app.js").write_bytes(b"console.log('hi')")
+
+    remote_dir = f"{home_dir_path}/myapp"
+    api_responses.add(responses.POST, url=f"{base_url}path{remote_dir}/index.html", status=201)
+    api_responses.add(responses.POST, url=f"{base_url}path{remote_dir}/static/app.js", status=201)
+    api_responses.add(responses.POST, url=f"{base_url}path{remote_dir}/static/css/style.css", status=201)
+
+    Files().tree_post(str(tmp_path), remote_dir)
+
+    assert len(api_responses.calls) == 3
+    uploaded_urls = {call.request.url for call in api_responses.calls}
+    assert uploaded_urls == {
+        f"{base_url}path{remote_dir}/index.html",
+        f"{base_url}path{remote_dir}/static/app.js",
+        f"{base_url}path{remote_dir}/static/css/style.css",
+    }
+
+
+def test_tree_post_creates_empty_directories(
+        api_token, api_responses, base_url, home_dir_path, tmp_path
+):
+    (tmp_path / "empty_dir").mkdir()
+    remote_dir = f"{home_dir_path}/myapp"
+    empty_file_url = f"{base_url}path{remote_dir}/empty_dir/.empty"
+    api_responses.add(responses.POST, url=empty_file_url, status=201)
+    api_responses.add(responses.DELETE, url=empty_file_url, status=204)
+
+    Files().tree_post(str(tmp_path), remote_dir)
+
+    assert len(api_responses.calls) == 2
+    assert api_responses.calls[0].request.url == empty_file_url
+    assert api_responses.calls[0].request.method == "POST"
+    assert api_responses.calls[1].request.url == empty_file_url
+    assert api_responses.calls[1].request.method == "DELETE"
+
+
+def test_tree_post_raises_when_path_is_not_a_directory(
+        api_token, tmp_path
+):
+    file_path = tmp_path / "somefile.txt"
+    file_path.write_bytes(b"content")
+
+    with pytest.raises(ValueError) as e:
+        Files().tree_post(str(file_path), "/home/user/remote")
+
+    assert "is not a directory" in str(e.value)
+
+
+def test_tree_post_fails_fast_on_upload_error(
+        api_token, api_responses, base_url, home_dir_path, tmp_path
+):
+    (tmp_path / "a.txt").write_bytes(b"aaa")
+    (tmp_path / "b.txt").write_bytes(b"bbb")
+    (tmp_path / "c.txt").write_bytes(b"ccc")
+
+    remote_dir = f"{home_dir_path}/myapp"
+    api_responses.add(responses.POST, url=f"{base_url}path{remote_dir}/a.txt", status=201)
+    api_responses.add(responses.POST, url=f"{base_url}path{remote_dir}/b.txt", status=403)
+
+    with pytest.raises(PythonAnywhereApiException):
+        Files().tree_post(str(tmp_path), remote_dir)
+
+    assert len(api_responses.calls) == 2
