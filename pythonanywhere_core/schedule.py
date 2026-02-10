@@ -1,9 +1,8 @@
-import getpass
 from typing import List, Optional
 
 from typing_extensions import Literal
 
-from pythonanywhere_core.base import call_api, get_api_endpoint
+from pythonanywhere_core.base import call_api, get_api_endpoint, get_username
 from pythonanywhere_core.exceptions import PythonAnywhereApiException
 
 
@@ -28,7 +27,7 @@ class Schedule:
         - :meth:`Schedule.update`: Update an existing task.
     """
 
-    base_url: str = get_api_endpoint(username=getpass.getuser(), flavor="schedule")
+    base_url: str = get_api_endpoint(username=get_username(), flavor="schedule")
 
     def create(self, params: dict) -> Optional[dict]:
         """Creates new scheduled task using `params`.

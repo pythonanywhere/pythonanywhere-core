@@ -1,3 +1,4 @@
+import getpass
 import platform
 from pythonanywhere_core import __version__
 
@@ -7,9 +8,22 @@ import responses
 from pythonanywhere_core.base import (
     call_api,
     get_api_endpoint,
+    get_username,
     helpful_token_error_message,
 )
 from pythonanywhere_core.exceptions import AuthenticationError, NoTokenError
+
+
+def test_get_username_returns_env_var_when_set(monkeypatch):
+    monkeypatch.setenv("PYTHONANYWHERE_USERNAME", "bill")
+
+    assert get_username() == "bill"
+
+
+def test_get_username_falls_back_to_getpass(monkeypatch):
+    monkeypatch.delenv("PYTHONANYWHERE_USERNAME", raising=False)
+
+    assert get_username() == getpass.getuser()
 
 
 def test_get_api_endpoint_defaults_to_pythonanywhere_dot_com_if_no_environment_variables():

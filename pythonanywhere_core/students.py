@@ -1,7 +1,6 @@
-import getpass
 from typing import Optional
 
-from pythonanywhere_core.base import call_api, get_api_endpoint
+from pythonanywhere_core.base import call_api, get_api_endpoint, get_username
 
 
 class StudentsAPI:
@@ -22,7 +21,7 @@ class StudentsAPI:
         - :meth:`StudentsAPI.delete`: Remove a student.
     """
 
-    base_url: str = get_api_endpoint(username=getpass.getuser(), flavor="students")
+    base_url: str = get_api_endpoint(username=get_username(), flavor="students")
 
     def get(self) -> Optional[dict]:
         """Returns list of PythonAnywhere students related with user's account.

@@ -1,11 +1,10 @@
-import getpass
 from pathlib import Path
 from typing import Tuple, Union
 from urllib.parse import urljoin
 
 from requests.models import Response
 
-from pythonanywhere_core.base import call_api, get_api_endpoint
+from pythonanywhere_core.base import call_api, get_api_endpoint, get_username
 from pythonanywhere_core.exceptions import PythonAnywhereApiException
 
 
@@ -39,7 +38,7 @@ class Files:
     """
 
 
-    base_url = get_api_endpoint(username=getpass.getuser(), flavor="files")
+    base_url = get_api_endpoint(username=get_username(), flavor="files")
     path_endpoint = urljoin(base_url, "path")
     sharing_endpoint = urljoin(base_url, "sharing/")
     tree_endpoint = urljoin(base_url, "tree/")

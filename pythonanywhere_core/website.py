@@ -1,7 +1,4 @@
-import getpass
-
-
-from pythonanywhere_core.base import call_api, get_api_endpoint
+from pythonanywhere_core.base import call_api, get_api_endpoint, get_username
 from pythonanywhere_core.exceptions import DomainAlreadyExistsException, PythonAnywhereApiException
 
 
@@ -24,8 +21,8 @@ class Website:
     """
 
     def __init__(self) -> None:
-        self.websites_base_url = get_api_endpoint(username=getpass.getuser(), flavor="websites")
-        self.domains_base_url = get_api_endpoint(username=getpass.getuser(), flavor="domains")
+        self.websites_base_url = get_api_endpoint(username=get_username(), flavor="websites")
+        self.domains_base_url = get_api_endpoint(username=get_username(), flavor="domains")
 
 
     def create(self, domain_name: str, command: str) -> dict:

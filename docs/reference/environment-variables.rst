@@ -32,44 +32,6 @@ API_TOKEN
 Optional Variables
 ------------------
 
-PYTHONANYWHERE_SITE
-~~~~~~~~~~~~~~~~~~~~
-
-**Required:** No
-
-**Default:** ``www.pythonanywhere.com`` (or ``www.`` + ``PYTHONANYWHERE_DOMAIN`` if that is set)
-
-**Description:** Override the hostname used for API requests. Useful for testing against different PythonAnywhere environments or when using EU servers.
-
-.. note::
-   When running on PythonAnywhere, this variable is automatically set in the environment
-   to match your system location (e.g., ``www.pythonanywhere.com`` or ``eu.pythonanywhere.com``).
-
-**Usage:**
-
-.. code-block:: bash
-
-    export PYTHONANYWHERE_SITE="eu.pythonanywhere.com"
-
-PYTHONANYWHERE_DOMAIN
-~~~~~~~~~~~~~~~~~~~~~~
-
-**Required:** No
-
-**Default:** ``pythonanywhere.com``
-
-**Description:** Override the domain used for constructing the API hostname. Used in combination with the site hostname. Only used when ``PYTHONANYWHERE_SITE`` is not set.
-
-.. note::
-   When running on PythonAnywhere, this variable is automatically set in the environment
-   to match your domain (e.g., ``pythonanywhere.com``).
-
-**Usage:**
-
-.. code-block:: bash
-
-    export PYTHONANYWHERE_DOMAIN="example.com"
-
 PYTHONANYWHERE_CLIENT
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -101,6 +63,59 @@ PYTHONANYWHERE_CLIENT
     # Set at application startup
     CLI_VERSION = version("my-cli-package")
     os.environ["PYTHONANYWHERE_CLIENT"] = f"my-cli/{CLI_VERSION}"
+
+PYTHONANYWHERE_DOMAIN
+~~~~~~~~~~~~~~~~~~~~~~
+
+**Required:** No
+
+**Default:** ``pythonanywhere.com``
+
+**Description:** Override the domain used for constructing the API hostname. Used in combination with the site hostname. Only used when ``PYTHONANYWHERE_SITE`` is not set.
+
+.. note::
+   When running on PythonAnywhere, this variable is automatically set in the environment
+   to match your domain (e.g., ``pythonanywhere.com``).
+
+**Usage:**
+
+.. code-block:: bash
+
+    export PYTHONANYWHERE_DOMAIN="example.com"
+
+PYTHONANYWHERE_SITE
+~~~~~~~~~~~~~~~~~~~~
+
+**Required:** No
+
+**Default:** ``www.pythonanywhere.com`` (or ``www.`` + ``PYTHONANYWHERE_DOMAIN`` if that is set)
+
+**Description:** Override the hostname used for API requests. Useful for testing against different PythonAnywhere environments or when using EU servers.
+
+.. note::
+   When running on PythonAnywhere, this variable is automatically set in the environment
+   to match your system location (e.g., ``www.pythonanywhere.com`` or ``eu.pythonanywhere.com``).
+
+**Usage:**
+
+.. code-block:: bash
+
+    export PYTHONANYWHERE_SITE="eu.pythonanywhere.com"
+
+PYTHONANYWHERE_USERNAME
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Required:** No
+
+**Default:** The current system username (via :func:`getpass.getuser`)
+
+**Description:** Override the PythonAnywhere username used for constructing API endpoints. When running outside of PythonAnywhere (e.g., from a local machine), the system username often won't match your PythonAnywhere username, so this variable lets you specify the correct one.
+
+**Usage:**
+
+.. code-block:: bash
+
+    export PYTHONANYWHERE_USERNAME="your_pa_username"
 
 See Also
 --------

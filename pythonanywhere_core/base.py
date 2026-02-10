@@ -1,3 +1,4 @@
+import getpass
 import os
 import platform
 from typing import Dict
@@ -18,6 +19,13 @@ PYTHON_VERSIONS: Dict[str, str] = {
     "3.13": "python313",
     "3.14": "python314",
 }
+
+
+def get_username() -> str:
+    """Returns PythonAnywhere username from ``PYTHONANYWHERE_USERNAME``
+    environment variable, falling back to :func:`getpass.getuser`."""
+
+    return os.environ.get("PYTHONANYWHERE_USERNAME", getpass.getuser())
 
 
 def get_api_endpoint(username: str, flavor: str) -> str:

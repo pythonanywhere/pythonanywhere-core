@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import os
-import getpass
 from pathlib import Path
 from textwrap import dedent
 from typing import Any
 
 from dateutil.parser import parse
 
-from pythonanywhere_core.base import call_api, get_api_endpoint, PYTHON_VERSIONS
+from pythonanywhere_core.base import call_api, get_api_endpoint, get_username, PYTHON_VERSIONS
 from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException, MissingCNAMEException
 
 
@@ -35,7 +34,7 @@ class Webapp:
     Class Methods:
         - :meth:`Webapp.list_webapps`: List all webapps for the current user.
     """
-    username = getpass.getuser()
+    username = get_username()
     files_url = get_api_endpoint(username=username, flavor="files")
     webapps_url = get_api_endpoint(username=username, flavor="webapps")
 
