@@ -31,7 +31,7 @@ typing_extensions = "^4.5.0"
 pytest = "^9.0.0"
 pytest-cov = "^7.0.0"
 pytest-mock = "^3.10.0"
-responses = "^0.25.0"
+responses = "^0.26.0"
 sphinx = "7.4.7"
 sphinx-rtd-theme = "^3.0.0"
 
