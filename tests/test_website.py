@@ -170,6 +170,23 @@ def test_sets_lets_encrypt_cert(api_responses, domain_name, domains_base_url):
     }
 
 
+def test_raises_if_setting_lets_encrypt_cert_does_not_return_200(
+    api_responses, domain_name, domains_base_url
+):
+    api_responses.add(
+        responses.POST,
+        url=f"{domains_base_url}{domain_name}/ssl/",
+        status=500,
+        body='{"status": "error", "error_message": "Certificate issuance failed"}',
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as e:
+        Website().auto_ssl(domain_name=domain_name)
+
+    assert "POST to set Let's Encrypt SSL certificate via API failed, got" in str(e.value)
+    assert "Certificate issuance failed" in str(e.value)
+
+
 def test_returns_ssl_info(api_responses, domain_name, domains_base_url):
     api_responses.add(
         responses.GET,

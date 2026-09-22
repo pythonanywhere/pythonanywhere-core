@@ -90,6 +90,10 @@ class Website:
             "post",
             json={"cert_type": "letsencrypt-auto-renew"}
         )
+        if not response.ok:
+            raise PythonAnywhereApiException(
+                f"POST to set Let's Encrypt SSL certificate via API failed, got {response}:{response.text}"
+            )
         return response.json()
 
     def get_ssl_info(self, domain_name) -> dict:
