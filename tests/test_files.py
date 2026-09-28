@@ -327,6 +327,23 @@ def test_sharing_get_returns_empty_string_when_path_not_shared(
     assert Files().sharing_get(valid_path) == ""
 
 
+@pytest.mark.parametrize("status_code", [400, 403, 429, 500])
+def test_sharing_get_raises_on_errors_other_than_not_found(
+        api_token, api_responses, base_url, home_dir_path, status_code
+):
+    path = f"{home_dir_path}/README.txt"
+    url = urljoin(base_url, f"sharing/?path={path}")
+    api_responses.add(
+        responses.GET, url=url, status=status_code, json={"detail": "request failed"}
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Files().sharing_get(path)
+
+    assert str(status_code) in str(exc.value)
+    assert "request failed" in str(exc.value)
+
+
 def test_returns_204_on_sucessful_unshare(
         api_token, api_responses, base_url, home_dir_path, username
 ):

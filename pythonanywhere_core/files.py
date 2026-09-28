@@ -137,7 +137,7 @@ class Files:
         """Checks sharing status for a `path`.
 
         Returns url with sharing link if file is shared or an empty
-        string otherwise."""
+        string on HTTP 404 (not shared). Raises on other API errors."""
 
         url = f"{self.sharing_endpoint}?path={path}"
 
@@ -145,8 +145,12 @@ class Files:
         if result.ok:
             sharing_url_suffix = result.json()["url"]
             return self._make_sharing_url(sharing_url_suffix)
-        else:
+        if result.status_code == 404:
             return ""
+
+        raise PythonAnywhereApiException(
+            f"GET sharing status for {url} failed, got {result}{self._error_msg(result)}"
+        )
 
     def sharing_delete(self, path: str) -> int:
         """Stops sharing file at `path`.
