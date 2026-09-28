@@ -154,6 +154,24 @@ def test_deletes_website(api_responses, domain_name, websites_base_url):
     assert Website().delete(domain_name=domain_name) == {}
 
 
+@pytest.mark.parametrize("status_code", [200, 202, 403, 404, 500])
+def test_delete_raises_unless_response_is_204(
+        api_responses, domain_name, websites_base_url, status_code
+):
+    api_responses.add(
+        responses.DELETE,
+        url=f"{websites_base_url}{domain_name}/",
+        status=status_code,
+        body="unexpected response",
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Website().delete(domain_name=domain_name)
+
+    assert str(status_code) in str(exc.value)
+    assert "unexpected response" in str(exc.value)
+
+
 def test_sets_lets_encrypt_cert(api_responses, domain_name, domains_base_url):
     api_responses.add(
         responses.POST,

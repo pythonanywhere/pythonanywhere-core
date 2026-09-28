@@ -110,10 +110,15 @@ class Website:
     def delete(self, domain_name: str) -> dict:
         """Deletes website with ``domain_name``.
         :param domain_name: domain name for website to delete
-        :return: empty dictionary"""
+        :return: empty dictionary on HTTP 204
+        :raises PythonAnywhereApiException: if the response is not HTTP 204"""
 
-        call_api(
+        response = call_api(
             f"{self.websites_base_url}{domain_name}/",
             "delete",
         )
+        if response.status_code != 204:
+            raise PythonAnywhereApiException(
+                f"DELETE website via API failed, got {response}:{response.text}"
+            )
         return {}
