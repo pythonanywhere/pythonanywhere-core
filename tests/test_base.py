@@ -70,12 +70,13 @@ def test_get_api_endpoint_returns_url_with_correct_api_version(flavor, expected_
     assert result == f"https://www.pythonanywhere.com/api/{expected_version}/user/bill/{flavor}/"
 
 
-def test_raises_on_401(api_token, api_responses):
+def test_raises_on_401_without_printing(api_token, api_responses, capsys):
     url = "https://foo.com/"
     api_responses.add(responses.POST, url, status=401, body="nope")
     with pytest.raises(AuthenticationError) as e:
         call_api(url, "post")
     assert str(e.value) == "Authentication error 401 calling API: nope"
+    assert capsys.readouterr().out == ""
 
 
 

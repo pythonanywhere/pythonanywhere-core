@@ -96,6 +96,5 @@ def call_api(url: str, method: str, **kwargs) -> requests.Response:
         **kwargs,
     )
     if response.status_code == 401:
-        print(response, response.text)
         raise AuthenticationError(f"Authentication error {response.status_code} calling API: {response.text}")
     return response
