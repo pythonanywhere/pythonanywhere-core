@@ -134,6 +134,24 @@ def test_get_returns_json_with_info_for_given_domain(
     assert Website().get(domain_name=domain_name) == website_info
 
 
+@pytest.mark.parametrize("status_code, body", UNEXPECTED_WEBSITE_RESPONSES)
+def test_get_raises_unless_response_is_200(
+        api_responses, domain_name, websites_base_url, status_code, body
+):
+    api_responses.add(
+        responses.GET,
+        url=f"{websites_base_url}{domain_name}/",
+        status=status_code,
+        body=body,
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Website().get(domain_name)
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
+
+
 def test_list_returns_json_with_info_for_all_websites(api_responses, websites_base_url, website_info):
     api_responses.add(
         responses.GET,

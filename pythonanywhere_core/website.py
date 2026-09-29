@@ -52,12 +52,17 @@ class Website:
     def get(self, domain_name: str) -> dict:
         """Returns dictionary with website info for ``domain_name``.
         :param domain_name:
-        :return: dictionary with website info"""
+        :return: dictionary with website info on HTTP 200
+        :raises PythonAnywhereApiException: if the response is not HTTP 200"""
 
         response = call_api(
             f"{self.websites_base_url}{domain_name}/",
             "get",
         )
+        if response.status_code != 200:
+            raise PythonAnywhereApiException(
+                f"GET website via API failed, got {response}:{response.text}"
+            )
         return response.json()
 
     def list(self) -> list:
