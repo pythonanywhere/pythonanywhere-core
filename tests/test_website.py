@@ -13,6 +13,18 @@ from pythonanywhere_core.website import Website
 pytestmark = pytest.mark.usefixtures("api_token")
 
 
+UNEXPECTED_WEBSITE_RESPONSES = [
+    (201, '{"status": "OK"}'),
+    (202, '{"status": "accepted"}'),
+    (204, ""),
+    (403, '{"detail": "Forbidden"}'),
+    (404, '{"detail": "Not found"}'),
+    (409, '{"status": "error", "error": "reload failed"}'),
+    (500, '{"error": "Server error"}'),
+    (500, "Non-JSON server error"),
+]
+
+
 @pytest.fixture
 def websites_base_url():
     return get_api_endpoint(username=getpass.getuser(), flavor="websites")
@@ -142,6 +154,24 @@ def test_reloads_website(api_responses, domain_name, websites_base_url):
     )
 
     assert Website().reload(domain_name=domain_name) == {"status": "OK"}
+
+
+@pytest.mark.parametrize("status_code, body", UNEXPECTED_WEBSITE_RESPONSES)
+def test_reload_raises_unless_response_is_200(
+        api_responses, domain_name, websites_base_url, status_code, body
+):
+    api_responses.add(
+        responses.POST,
+        url=f"{websites_base_url}{domain_name}/reload/",
+        status=status_code,
+        body=body,
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Website().reload(domain_name)
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
 
 
 def test_deletes_website(api_responses, domain_name, websites_base_url):

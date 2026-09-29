@@ -73,12 +73,17 @@ class Website:
     def reload(self, domain_name: str) -> dict:
         """Reloads website with ``domain_name``.
         :param domain_name: domain name for website to reload
-        :return: dictionary with response"""
+        :return: dictionary with response on HTTP 200
+        :raises PythonAnywhereApiException: if the response is not HTTP 200"""
 
         response = call_api(
             f"{self.websites_base_url}{domain_name}/reload/",
             "post",
         )
+        if response.status_code != 200:
+            raise PythonAnywhereApiException(
+                f"POST to reload website via API failed, got {response}:{response.text}"
+            )
         return response.json()
 
     def auto_ssl(self, domain_name: str) -> dict:
