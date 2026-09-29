@@ -152,15 +152,37 @@ def test_get_raises_unless_response_is_200(
     assert body in str(exc.value)
 
 
-def test_list_returns_json_with_info_for_all_websites(api_responses, websites_base_url, website_info):
+@pytest.mark.parametrize("has_websites", [False, True])
+def test_list_returns_json_with_info_for_all_websites(
+        api_responses, websites_base_url, website_info, has_websites
+):
+    websites = [website_info] if has_websites else []
     api_responses.add(
         responses.GET,
         url=websites_base_url,
         status=200,
-        body=json.dumps([website_info])
+        body=json.dumps(websites)
     )
 
-    assert Website().list() == [website_info]
+    assert Website().list() == websites
+
+
+@pytest.mark.parametrize("status_code, body", UNEXPECTED_WEBSITE_RESPONSES)
+def test_list_raises_unless_response_is_200(
+        api_responses, websites_base_url, status_code, body
+):
+    api_responses.add(
+        responses.GET,
+        url=websites_base_url,
+        status=status_code,
+        body=body,
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Website().list()
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
 
 
 def test_reloads_website(api_responses, domain_name, websites_base_url):

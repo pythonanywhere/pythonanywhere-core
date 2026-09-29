@@ -67,12 +67,17 @@ class Website:
 
     def list(self) -> list:
         """Returns list of dictionaries with all websites info.
-        :return: list of dictionaries with websites info"""
+        :return: list of dictionaries with websites info on HTTP 200
+        :raises PythonAnywhereApiException: if the response is not HTTP 200"""
 
         response = call_api(
             self.websites_base_url,
             "get",
         )
+        if response.status_code != 200:
+            raise PythonAnywhereApiException(
+                f"GET websites via API failed, got {response}:{response.text}"
+            )
         return response.json()
 
     def reload(self, domain_name: str) -> dict:
