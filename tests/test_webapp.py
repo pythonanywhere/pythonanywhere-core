@@ -265,8 +265,9 @@ def test_create_static_file_mapping_posts_correctly(api_token, api_responses, do
     static_files_url = f"{domain_url}static_files/"
     api_responses.add(responses.POST, static_files_url, status=201)
 
-    webapp.create_static_file_mapping("/assets/", "/project/assets")
+    result = webapp.create_static_file_mapping("/assets/", "/project/assets")
 
+    assert result is None
     post = api_responses.calls[0]
     assert post.request.url == static_files_url
     assert post.request.headers["content-type"] == "application/json"
@@ -274,6 +275,39 @@ def test_create_static_file_mapping_posts_correctly(api_token, api_responses, do
     assert json.loads(post.request.body.decode("utf8")) == {
         "url": "/assets/",
         "path": "/project/assets",
+    }
+
+
+@pytest.mark.parametrize("status_code", [200, 202, 204, 400, 403, 500])
+def test_static_file_mapping_raises_unless_response_is_201(
+        api_token, api_responses, domain_url, webapp, status_code
+):
+    body = "" if status_code == 204 else "Mapping creation failed"
+    api_responses.add(
+        responses.POST,
+        f"{domain_url}static_files/",
+        status=status_code,
+        body=body,
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        webapp.create_static_file_mapping("/assets/", Path("/project/assets"))
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
+
+
+def test_default_static_mappings_stop_after_first_api_failure(
+        api_token, api_responses, domain_url, webapp
+):
+    api_responses.add(responses.POST, f"{domain_url}static_files/", status=500)
+
+    with pytest.raises(PythonAnywhereApiException):
+        webapp.add_default_static_files_mappings(Path("/project"))
+
+    assert len(api_responses.calls) == 1
+    assert json.loads(api_responses.calls[0].request.body) == {
+        "url": "/static/", "path": "/project/static"
     }
 
 

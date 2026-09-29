@@ -106,10 +106,14 @@ class Webapp:
         :param url_path: URL path (e.g., '/static/')
         :param directory_path: Filesystem path to serve (as Path)
 
-        :raises PythonAnywhereApiException: if API call fails
+        :raises PythonAnywhereApiException: if the response is not HTTP 201
         """
         url = f"{self.domain_url}static_files/"
-        call_api(url, "post", json=dict(url=url_path, path=str(directory_path)))
+        response = call_api(url, "post", json=dict(url=url_path, path=str(directory_path)))
+        if response.status_code != 201:
+            raise PythonAnywhereApiException(
+                f"POST to create static file mapping via API failed, got {response}:{response.text}"
+            )
 
     def add_default_static_files_mappings(self, project_path: Path) -> None:
         """Add default static files mappings for /static/ and /media/.
