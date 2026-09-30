@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from typing_extensions import Literal
 
@@ -29,24 +29,24 @@ class Schedule:
 
     base_url: str = get_api_endpoint(username=get_username(), flavor="schedule")
 
-    def create(self, params: dict) -> Optional[dict]:
+    def create(self, params: dict) -> dict:
         """Creates new scheduled task using `params`.
 
         Params should be: command, enabled (True or False), interval (daily or
         hourly), hour (24h format) and minute.
 
         :param params: dictionary with required scheduled task specs
-        :returns: dictionary with created task specs"""
+        :returns: dictionary with created task specs on HTTP 201
+        :raises PythonAnywhereApiException: if the response is not HTTP 201"""
 
         result = call_api(self.base_url, "POST", json=params)
 
         if result.status_code == 201:
             return result.json()
 
-        if not result.ok:
-            raise PythonAnywhereApiException(
-                f"POST to set new task via API failed, got {result}: {result.text}"
-            )
+        raise PythonAnywhereApiException(
+            f"POST to set new task via API failed, got {result}: {result.text}"
+        )
 
     def delete(self, task_id: int) -> Literal[True]:
         """Deletes scheduled task by id.

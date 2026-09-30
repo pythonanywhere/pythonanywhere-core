@@ -83,6 +83,28 @@ def test_creates_hourly_task(
     assert Schedule().create(hourly_task_params) == task_specs
 
 
+@pytest.mark.parametrize("status_code, body", [
+    (200, '{"task_id": 42}'),
+    (202, '{"status": "accepted"}'),
+    (204, ""),
+    (400, '{"detail": "Invalid task"}'),
+    (403, '{"detail": "Forbidden"}'),
+    (500, '{"detail": "Server error"}'),
+    (500, "Non-JSON server error"),
+])
+def test_create_raises_unless_response_is_201(
+        api_token, api_responses, task_base_url, daily_task_params, status_code, body
+):
+    api_responses.add(responses.POST, task_base_url, status=status_code, body=body)
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Schedule().create(daily_task_params)
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
 def test_raises_because_missing_params(api_token, api_responses, task_base_url):
     body = (
         '{"interval":["This field is required."],"command":["This field is required."],'
