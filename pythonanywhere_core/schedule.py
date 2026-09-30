@@ -52,7 +52,8 @@ class Schedule:
         """Deletes scheduled task by id.
 
         :param task_id: scheduled task to be deleted id number
-        :returns: True when API response is 204"""
+        :returns: True when API response is 204
+        :raises PythonAnywhereApiException: if the response is not HTTP 204"""
 
         result = call_api(
             f"{self.base_url}{task_id}/", "DELETE"
@@ -61,10 +62,9 @@ class Schedule:
         if result.status_code == 204:
             return True
 
-        if not result.ok:
-            raise PythonAnywhereApiException(
-                f"DELETE via API on task {task_id} failed, got {result}: {result.text}"
-            )
+        raise PythonAnywhereApiException(
+            f"DELETE via API on task {task_id} failed, got {result}: {result.text}"
+        )
 
     def get_list(self) -> List[dict]:
         """Gets list of existing scheduled tasks.

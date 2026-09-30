@@ -133,6 +133,21 @@ def test_deletes_task(api_token, api_responses, task_base_url):
     assert result is True
 
 
+@pytest.mark.parametrize("status_code", [200, 201, 202, 403, 404, 500])
+@pytest.mark.parametrize("body", ['{"detail": "Deletion failed"}', "Non-JSON error"])
+def test_delete_raises_unless_response_is_204(
+        api_token, api_responses, task_base_url, status_code, body
+):
+    api_responses.add(responses.DELETE, f"{task_base_url}42/", status=status_code, body=body)
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Schedule().delete(42)
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
 def test_raises_because_attempt_to_delete_nonexisting_task(api_token, api_responses, task_base_url):
     body = '{"detail": "Not fount."}'
     api_responses.add(
