@@ -117,15 +117,16 @@ class Files:
         """Starts sharing a file at `path`.
 
         Returns a tuple with a message and sharing link on
-        success, raises otherwise.  Message is "successfully shared" on success,
-        "was already shared" if file has been already shared."""
+        HTTP 200/201, raises otherwise. Message is "successfully shared" on 201,
+        "was already shared" on 200."""
 
         url = self.sharing_endpoint
 
         result = call_api(url, "POST", json={"path": path})
 
-        if result.ok:
-            msg = {200: "was already shared", 201: "successfully shared"}[result.status_code]
+        messages = {200: "was already shared", 201: "successfully shared"}
+        if result.status_code in messages:
+            msg = messages[result.status_code]
             sharing_url_suffix = result.json()["url"]
             return msg, self._make_sharing_url(sharing_url_suffix)
 

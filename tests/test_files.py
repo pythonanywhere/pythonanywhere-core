@@ -274,6 +274,27 @@ def test_sharing_post_returns_url_when_path_successfully_shared_or_has_been_shar
     assert second_share[1] == sharing_url
 
 
+@pytest.mark.parametrize("status_code", [202, 204, 400, 403, 500])
+def test_sharing_post_rejects_unexpected_statuses(
+        api_token, api_responses, base_url, home_dir_path, status_code
+):
+    url = urljoin(base_url, "sharing/")
+    if status_code == 204:
+        api_responses.add(responses.POST, url, status=status_code, body="")
+    else:
+        api_responses.add(
+            responses.POST, url, status=status_code, json={"detail": "Sharing failed"}
+        )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Files().sharing_post(f"{home_dir_path}/README.txt")
+
+    assert str(status_code) in str(exc.value)
+    if status_code != 204:
+        assert "Sharing failed" in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
 @pytest.mark.skip(reason="not implemented in the api yet")
 def test_sharing_post_raises_exception_when_path_not_provided(
         api_token, api_responses, base_url, home_dir_path
