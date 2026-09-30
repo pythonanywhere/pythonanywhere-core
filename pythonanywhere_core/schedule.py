@@ -69,9 +69,15 @@ class Schedule:
     def get_list(self) -> List[dict]:
         """Gets list of existing scheduled tasks.
 
-        :returns: list of existing scheduled tasks specs"""
+        :returns: list of existing scheduled tasks specs on HTTP 200
+        :raises PythonAnywhereApiException: if the response is not HTTP 200"""
 
-        return call_api(self.base_url, "GET").json()
+        result = call_api(self.base_url, "GET")
+        if result.status_code != 200:
+            raise PythonAnywhereApiException(
+                f"GET scheduled tasks via API failed, got {result}: {result.text}"
+            )
+        return result.json()
 
     def get_specs(self, task_id: int) -> dict:
         """Get task specs by id.

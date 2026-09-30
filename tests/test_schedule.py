@@ -174,13 +174,34 @@ def test_raises_because_attempt_to_get_nonexisting_task(api_token, api_responses
     assert str(e.value) == expected_error_msg
 
 
-def test_returns_tasks_list(api_token, api_responses, task_base_url):
-    fake_specs = [{"fake": "specs"}, {"and": "more"}]
+@pytest.mark.parametrize("fake_specs", [[], [{"fake": "specs"}, {"and": "more"}]])
+def test_returns_tasks_list(api_token, api_responses, task_base_url, fake_specs):
     api_responses.add(
         responses.GET, url=task_base_url, status=200, body=json.dumps(fake_specs),
     )
 
     assert Schedule().get_list() == fake_specs
+
+
+@pytest.mark.parametrize("status_code, body", [
+    (201, "[]"),
+    (202, '{"status": "accepted"}'),
+    (204, ""),
+    (403, '{"detail": "Forbidden"}'),
+    (429, '{"detail": "Throttled"}'),
+    (500, '{"detail": "Server error"}'),
+    (500, "Non-JSON server error"),
+])
+def test_list_raises_unless_response_is_200(
+        api_token, api_responses, task_base_url, status_code, body
+):
+    api_responses.add(responses.GET, task_base_url, status=status_code, body=body)
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        Schedule().get_list()
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
 
 
 def test_updates_daily_task(
