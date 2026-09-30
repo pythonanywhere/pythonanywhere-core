@@ -51,6 +51,7 @@ class Webapp:
         :param nuke: if True, skip the check for existing webapp
 
         :raises SanityException: if API token is missing or webapp already exists
+        :raises PythonAnywhereApiException: if the existence check returns neither 200 nor 404
         """
         token = os.environ.get("API_TOKEN")
         if not token:
@@ -71,6 +72,11 @@ class Webapp:
         if response.status_code == 200:
             raise SanityException(
                 f"You already have a webapp for {self.domain}.\n\nUse the --nuke option if you want to replace it."
+            )
+
+        if response.status_code != 404:
+            raise PythonAnywhereApiException(
+                f"GET to check webapp existence via API failed, got {response}:{response.text}"
             )
 
     def create(self, python_version: str, virtualenv_path: Path | None, project_path: Path, nuke: bool) -> None:

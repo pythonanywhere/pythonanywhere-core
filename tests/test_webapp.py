@@ -88,9 +88,10 @@ def test_does_not_complain_if_api_token_exists(api_token, api_responses, domain_
     webapp.sanity_checks(nuke=False)  # should not raise
 
 
-def test_raises_if_no_api_token_exists(api_responses, no_api_token, webapp):
+@pytest.mark.parametrize("nuke", [False, True])
+def test_raises_if_no_api_token_exists(api_responses, no_api_token, webapp, nuke):
     with pytest.raises(SanityException) as e:
-        webapp.sanity_checks(nuke=False)
+        webapp.sanity_checks(nuke=nuke)
     assert "Could not find your API token" in str(e.value)
 
 
@@ -114,6 +115,27 @@ def test_does_not_raise_if_no_webapp(api_token, api_responses, domain_url, webap
     webapp.sanity_checks(nuke=False)  # should not raise
 
 
+@pytest.mark.parametrize("status_code", [201, 202, 204, 403, 429, 500])
+@pytest.mark.parametrize("json_body", [False, True])
+def test_sanity_checks_raise_on_unexpected_status(
+    api_token, api_responses, domain_url, webapp, status_code, json_body
+):
+    body = "" if status_code == 204 else (
+        '{"detail": "Preflight failed"}' if json_body else "Preflight failed"
+    )
+    api_responses.add(
+        responses.GET, domain_url, status=status_code, body=body,
+        content_type="application/json" if json_body else "text/plain",
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        webapp.sanity_checks(nuke=False)
+
+    assert str(status_code) in str(exc.value)
+    assert body in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
 def test_nuke_option_overrides_all_but_token_check(
     api_token, api_responses, domain, fake_home, virtualenvs_folder, webapp
 ):
@@ -121,6 +143,8 @@ def test_nuke_option_overrides_all_but_token_check(
     (virtualenvs_folder / domain).mkdir()
 
     webapp.sanity_checks(nuke=True)  # should not raise
+
+    assert len(api_responses.calls) == 0
 
 
 # CREATE
