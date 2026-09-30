@@ -262,16 +262,35 @@ def test_raises_if_patch_does_not_20x(api_responses, api_token, base_url, domain
 ## DELETE (for nuke functionality in CREATE)
 
 def test_does_delete_first_for_nuke_call(api_responses, api_token, base_url, domain_url, webapp):
-    api_responses.add(responses.DELETE, domain_url, status=200)
+    api_responses.add(responses.DELETE, domain_url, status=204)
     api_responses.add(responses.POST, base_url, status=201, body=json.dumps({"status": "OK"}))
     api_responses.add(responses.PATCH, domain_url, status=200)
 
     webapp.create("3.10", "/virtualenv/path", "/project/path", nuke=True)
 
+    assert [call.request.method for call in api_responses.calls] == ["DELETE", "POST", "PATCH"]
     delete = api_responses.calls[0]
     assert delete.request.method == "DELETE"
     assert delete.request.url == domain_url
     assert delete.request.headers["Authorization"] == f"Token {api_token}"
+
+
+@pytest.mark.parametrize("status_code", [200, 201, 202, 403, 409, 500])
+def test_nuke_stops_before_creation_when_delete_fails(
+    api_responses, api_token, base_url, domain_url, webapp, status_code
+):
+    # Register later steps too, so an erroneous continuation is observable.
+    api_responses.assert_all_requests_are_fired = False
+    api_responses.add(responses.DELETE, domain_url, status=status_code, body="Delete failed")
+    api_responses.add(responses.POST, base_url, status=201, json={"status": "OK"})
+    api_responses.add(responses.PATCH, domain_url, status=200)
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        webapp.create("3.10", "/virtualenv/path", "/project/path", nuke=True)
+
+    assert str(status_code) in str(exc.value)
+    assert "Delete failed" in str(exc.value)
+    assert [call.request.method for call in api_responses.calls] == ["DELETE"]
 
 
 def test_ignores_404_from_delete_call_when_nuking(api_responses, api_token, base_url, domain_url, webapp):

@@ -85,12 +85,17 @@ class Webapp:
         :param python_version:  python version to use
         :param virtualenv_path: path to the virtualenv, or None to skip setting it
         :param project_path: path to the project
-        :param nuke: if True, delete any existing webapp for this domain
+        :param nuke: if True, delete any existing webapp for this domain;
+            continue only on HTTP 204 (deleted) or 404 (absent)
 
         :raises PythonAnywhereApiException: if API call fails
         """
         if nuke:
-            call_api(self.domain_url, "delete")
+            response = call_api(self.domain_url, "delete")
+            if response.status_code not in (204, 404):
+                raise PythonAnywhereApiException(
+                    f"DELETE before replacing webapp via API failed, got {response}:{response.text}"
+                )
         response = call_api(
             self.webapps_url,
             "post",
