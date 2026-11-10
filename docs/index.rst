@@ -78,7 +78,7 @@ For development:
 
     git clone https://github.com/pythonanywhere/pythonanywhere-core.git
     cd pythonanywhere-core
-    poetry install
+    uv sync --locked --extra test --extra docs
 
 See :doc:`installation` for more details.
 

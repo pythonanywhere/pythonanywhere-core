@@ -20,17 +20,23 @@ To create local development environment, run:
 
 .. code-block:: shell
 
-    poetry install
+    uv sync --locked --extra test --extra docs
 
 To run tests:
 
 .. code-block:: shell
 
-    poetry run pytest
+    uv run --locked --extra test pytest
 
 To build docs:
 
 .. code-block:: shell
 
     cd docs
-    poetry run sphinx-build -b html . _build
+    uv run --locked --extra docs sphinx-build -b html . _build
+
+To build a source archive and wheel:
+
+.. code-block:: shell
+
+    uv build

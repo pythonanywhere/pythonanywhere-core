@@ -1,0 +1,7 @@
+include uv.lock
+recursive-include tests *.py
+recursive-include docs *.rst *.py Makefile make.bat
+recursive-include .github/workflows *.yml
+prune docs/_build
+prune docs/adr
+prune docs/rfc

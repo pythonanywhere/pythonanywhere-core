@@ -1,6 +1,6 @@
 name: Test
 
-on: 
+on:
   push:
     branches:
       - '**'
@@ -13,34 +13,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
-
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
     name: Python ${{ matrix.python-version }}
     steps:
-
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
     - name: Set up Python
       uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
       with:
         python-version: ${{ matrix.python-version }}
-        allow-prereleases: true
 
-
-    - name: Install poetry
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install poetry
+    - name: Install uv
+      uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
+      with:
+        enable-cache: false
 
     - name: Install dependencies
-      shell: bash
-      run: python -m poetry install
+      run: uv sync --locked --extra test
 
     - name: Test with pytest
-      run: |
-        python -m poetry run pytest
+      run: uv run --locked --extra test pytest -q
 
     - name: Check coverage
-      run: |
-        python -m poetry run pytest --cov=pythonanywhere_core --cov-fail-under=65
+      run: uv run --locked --extra test pytest --cov=pythonanywhere_core --cov-fail-under=65 -q
