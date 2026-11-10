@@ -18,6 +18,14 @@ class DomainAlreadyExistsException(PythonAnywhereApiException):
     pass
 
 
+class SlowStartupException(PythonAnywhereApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            "Website startup could not be confirmed after the reload attempt. "
+            "Check your website's server and error logs."
+        )
+
+
 class MissingCNAMEException(PythonAnywhereApiException):
     def __init__(self):
         super().__init__(

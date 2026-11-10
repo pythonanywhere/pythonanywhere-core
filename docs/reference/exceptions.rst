@@ -13,7 +13,9 @@ Exception Hierarchy
     ├── SanityException
     └── PythonAnywhereApiException
         ├── NoTokenError
-        └── DomainAlreadyExistsException
+        ├── DomainAlreadyExistsException
+        ├── MissingCNAMEException
+        └── SlowStartupException
 
 Exception Reference
 -------------------
@@ -135,6 +137,25 @@ PythonAnywhereApiException
      - Check the error message for specific details
      - Verify API endpoint URLs are correct
      - Ensure your account has required permissions
+
+SlowStartupException
+~~~~~~~~~~~~~~~~~~~~
+
+.. class:: SlowStartupException(PythonAnywhereApiException)
+   :no-index:
+
+   Raised by ``Webapp.reload()`` when the API returns HTTP 409 with the error
+   code ``slow_startup_error``. The server attempted the reload but its website
+   startup probe timed out. This response does not confirm that the website is
+   serving requests or will eventually start successfully.
+
+   The library does not retry the reload or print a warning. Callers can catch
+   this exception separately to explain the unconfirmed startup and direct the
+   user to the website's server and error logs. Existing handlers for
+   ``PythonAnywhereApiException`` also catch it.
+
+   Other HTTP errors, malformed responses, and client-side network timeouts
+   are not classified as ``SlowStartupException``.
 
 NoTokenError
 ~~~~~~~~~~~~

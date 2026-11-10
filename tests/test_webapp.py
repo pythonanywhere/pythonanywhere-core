@@ -4,12 +4,19 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+import requests
 import responses
 from dateutil.tz import tzutc
 from urllib.parse import urlencode
 
 from pythonanywhere_core.base import get_api_endpoint, PYTHON_VERSIONS
-from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException, MissingCNAMEException
+from pythonanywhere_core.exceptions import (
+    AuthenticationError,
+    MissingCNAMEException,
+    PythonAnywhereApiException,
+    SanityException,
+    SlowStartupException,
+)
 from pythonanywhere_core.webapp import Webapp
 
 
@@ -409,8 +416,108 @@ def test_raises_missing_cname_exception_on_cname_error(api_responses, api_token,
     assert "Could not find a CNAME for your website" in str(e.value)
 
 
+def test_reload_reports_unconfirmed_startup_as_a_specific_api_exception(
+    api_responses, api_token, domain_url, webapp, capsys
+):
+    reload_url = f"{domain_url}reload/"
+    api_responses.add(
+        responses.POST,
+        reload_url,
+        status=409,
+        json={"status": "error", "error": "slow_startup_error"},
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        webapp.reload()
+
+    assert type(exc.value) is SlowStartupException
+    assert "startup could not be confirmed" in str(exc.value)
+    assert "server and error logs" in str(exc.value)
+    assert len(api_responses.calls) == 1
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+
+
+@pytest.mark.parametrize("status_code", [400, 403, 404, 429, 500, 502])
+@pytest.mark.parametrize("error_code", ["slow_startup_error", "cname_error"])
+def test_reload_only_classifies_warning_codes_on_http_409(
+    api_responses, api_token, domain_url, webapp, status_code, error_code
+):
+    api_responses.add(
+        responses.POST,
+        f"{domain_url}reload/",
+        status=status_code,
+        json={"status": "error", "error": error_code},
+    )
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        webapp.reload()
+
+    assert type(exc.value) is PythonAnywhereApiException
+    assert str(status_code) in str(exc.value)
+    assert error_code in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        pytest.param('{"status":"error","error":"virtualenv_error"}', id="invalid-virtualenv"),
+        pytest.param('{"status":"error","error":"unexpected_error"}', id="unknown-error"),
+        pytest.param('{"status":"error"}', id="missing-error"),
+        pytest.param("{}", id="empty-object"),
+        pytest.param('{"error":null}', id="null-error"),
+        pytest.param('{"error":["slow_startup_error"]}', id="non-string-error"),
+        pytest.param('[{"error":"slow_startup_error"}]', id="array"),
+        pytest.param('"slow_startup_error"', id="string"),
+        pytest.param("null", id="null"),
+        pytest.param("409", id="number"),
+        pytest.param('{"error":"slow_startup_error"', id="invalid-json"),
+        pytest.param("<html>proxy error</html>", id="html"),
+        pytest.param("", id="empty-body"),
+    ],
+)
+def test_reload_preserves_diagnostics_for_unrecognized_http_409_responses(
+    api_responses, api_token, domain_url, webapp, body
+):
+    api_responses.add(responses.POST, f"{domain_url}reload/", status=409, body=body)
+
+    with pytest.raises(PythonAnywhereApiException) as exc:
+        webapp.reload()
+
+    assert type(exc.value) is PythonAnywhereApiException
+    assert "POST to reload webapp via API failed" in str(exc.value)
+    assert "409" in str(exc.value)
+    assert body in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
+def test_reload_keeps_authentication_failures_distinct(api_responses, api_token, domain_url, webapp):
+    body = {"status": "error", "error": "slow_startup_error"}
+    api_responses.add(responses.POST, f"{domain_url}reload/", status=401, json=body)
+
+    with pytest.raises(AuthenticationError) as exc:
+        webapp.reload()
+
+    assert "401" in str(exc.value)
+    assert len(api_responses.calls) == 1
+
+
+@pytest.mark.parametrize("error_type", [requests.exceptions.Timeout, requests.exceptions.ConnectionError])
+def test_reload_preserves_transport_failures_without_retrying(api_responses, api_token, domain_url, webapp, error_type):
+    failure = error_type("Connection failed before a reload response was received")
+    api_responses.add(responses.POST, f"{domain_url}reload/", body=failure)
+
+    with pytest.raises(error_type) as exc:
+        webapp.reload()
+
+    assert exc.value is failure
+    assert len(api_responses.calls) == 1
+
+
 # SET SSL
 ## /api/v0/user/{username}/webapps/{domain_name}/ssl/ : POST
+
 
 def test_does_post_to_ssl_url(api_responses, api_token, domain_url, webapp):
     ssl_url = f"{domain_url}ssl/"

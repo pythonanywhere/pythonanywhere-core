@@ -6,9 +6,28 @@ from textwrap import dedent
 from typing import Any
 
 from dateutil.parser import parse
+from requests.exceptions import JSONDecodeError
 
 from pythonanywhere_core.base import call_api, get_api_endpoint, get_username, PYTHON_VERSIONS
-from pythonanywhere_core.exceptions import SanityException, PythonAnywhereApiException, MissingCNAMEException
+from pythonanywhere_core.exceptions import (
+    MissingCNAMEException,
+    PythonAnywhereApiException,
+    SanityException,
+    SlowStartupException,
+)
+
+
+def _reload_warning(payload: object) -> PythonAnywhereApiException | None:
+    if not isinstance(payload, dict):
+        return None
+    error = payload.get("error")
+    if not isinstance(error, str):
+        return None
+    warning_type = {
+        "cname_error": MissingCNAMEException,
+        "slow_startup_error": SlowStartupException,
+    }.get(error)
+    return warning_type() if warning_type is not None else None
 
 
 class Webapp:
@@ -140,12 +159,19 @@ class Webapp:
         """Reload webapp
 
         :raises MissingCNAMEException: if CNAME not found (reload succeeded)
+        :raises SlowStartupException: if startup could not be confirmed after the reload attempt
         :raises PythonAnywhereApiException: if API call fails"""
         url = f"{self.domain_url}reload/"
         response = call_api(url, "post")
         if not response.ok:
-            if response.status_code == 409 and response.json()["error"] == "cname_error":
-                raise MissingCNAMEException()
+            if response.status_code == 409:
+                try:
+                    payload = response.json()
+                except JSONDecodeError:
+                    payload = None
+                warning = _reload_warning(payload)
+                if warning is not None:
+                    raise warning
             raise PythonAnywhereApiException(f"POST to reload webapp via API failed, got {response}:{response.text}")
 
     def set_ssl(self, certificate: str, private_key: str) -> None:
